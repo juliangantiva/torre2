@@ -15,8 +15,8 @@ def get_data(request):
 
     #################################################################################
     username = 'juliangantiva'
-    # #username = 'manolo'
-    # params_con = {'deep': '1'} # grados de conexion
+    username = 'manolo'
+    #params_con = {'deep': '2'} # grados de conexion
     
     job_id = "QweRLKd9"
     #job_id = "0wxnG7r2"   # remoto sin horario
@@ -30,7 +30,7 @@ def get_data(request):
 
     #url_bio = "https://torre.bio/api/bios/{}".format(username)
 
-    # url_con = "https://torre.bio/api/people/{}/network".format(username)
+    #url_con = "https://torre.bio/api/people/{}/network".format(username)
 
     # url_job = "https://torre.co/api/opportunities/{}".format(job_id)
 
@@ -41,24 +41,17 @@ def get_data(request):
 
 
     # r_user = requests.get(url_bio).json()
-    # #r_conec = requests.get(url_con, params=params_con).json()
+    #r_conec = requests.get(url_con, params=params_con).json()
     #r_job = requests.get(url_job).json()
     # #r_people = requests.post(url_peo, params=params_peo).json()
     # r_oppor = requests.post(url_opp, params=params_opp).json()
 
-    # # r = r.json()
-    # # r = json.dumps(r)
-    # # parsed = json.loads(r)
-    # # r = json.dumps(parsed, indent=4, sort_keys=False)
-    # # print(r)
-
-
-    # r = json.dumps(r_user)
+    # r = json.dumps(r_conec)
     # parsed = json.loads(r)
     # r = json.dumps(parsed, indent=4, sort_keys=False)
     # print(r)
 
-    # f= open("user_data.txt","w+")
+    # f= open("conec_data.txt","w+")
     # f.write(r)
     # f.close() 
     #################################################################################
@@ -74,7 +67,7 @@ def get_data(request):
     # r_job = json.dumps(r)
     # r_job = json.loads(r)
 
-    r = json.dumps(r_job)
+    r = json.dumps(r_user)
     parsed = json.loads(r)
     print(json.dumps(parsed, indent=4, sort_keys=False))
 
@@ -156,6 +149,7 @@ def get_data(request):
     comp_maxamount = to_dollar_yearly(comp_maxamount, comp_currency, comp_periodicity)
 
     opportunities = r_user['opportunities']
+    print(opportunities)
     if opportunity == "employee":
         oppo_currency   = opportunities[9]['data'][0:3]
         oppo_amount     = opportunities[10]['data']
@@ -188,13 +182,41 @@ def get_data(request):
     job_salary['opportunity'] = r_job['opportunity']
     job_salary['salary_ok'] = salary_ok
 
+    ##############################
+    # Languaje
+
+    languages_user   = r_user['languages']
+    languages_job    =  r_job['languages']
+
+
+    equal_languaje = []
+    for lang_job_a in languages_job:
+        equal = False
+        for lang_user_a in languages_user:
+            if lang_job_a['language']['code'] == lang_user_a['code']:
+                
+                lang1 = languaje_fluency(lang_job_a['fluency'])
+                lang2 = languaje_fluency(lang_user_a['fluency'])
+
+                if lang1 <= lang2:
+                    equal = True
+
+        equal_languaje.append(1) if equal else equal_languaje.append(0)
+
+    for ind, lang_job_a in enumerate(languages_job):
+        lang_job_a['accomplish'] = equal_languaje[ind]
 
     ##############################
 
+    params = {'deep': '2'} # grados de conexion
+    url = "https://torre.bio/api/people/{}/network".format(username)
+    r_conec = requests.get(url, params=params).json()
+
     context = {
-		'job_strengths': job_stren,
+        'job_strengths': job_stren,
         'job_location': job_location,
         'job_salary': job_salary,
+        'job_languages': languages_job,
 	}
 
     return render(request, 'show_info.html', context)
@@ -222,3 +244,15 @@ def to_dollar_yearly(amount, currency, periodicity):
             amount2 = amount2*8*22*12   # Aprox, changes with country
 
     return amount2
+
+
+def languaje_fluency(fluency):
+    fluency_num = 0
+    if fluency == 'reading':
+        fluency_num = 1
+    if fluency == 'conversational':
+        fluency_num = 2
+    if fluency == 'fully-fluent':
+        fluency_num = 3
+
+    return fluency_num

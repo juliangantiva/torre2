@@ -70,6 +70,16 @@
     {{ job_salary.opportunity }}
     {{ job_salary.salary_ok }}
 
+    </br></br>
+
+    {% for job_languages_a  in job_languages %}
+  
+        <div>{{job_languages_a.language.name}}</div>
+        <div>{{job_languages_a.fluency}}</div>
+        <div>{{job_languages_a.accomplish}}</div>
+
+    {% endfor %}
+
               
 <script>
 
