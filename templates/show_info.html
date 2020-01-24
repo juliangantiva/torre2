@@ -17,13 +17,80 @@
         }
 
         body{
-            margin: 0;        
+            margin: 0;
+            background-color: #010101;  
+            font-family: Muli,Helvetica,Arial,sans-serif;      
         }
 
         img{
             max-width: 100%;
         }
 
+        .menu{
+            width: 100%;
+            background-color: #27292D;
+            height: 100px;
+            /* box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2); */
+            box-shadow: 0 1px 3px rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.14), 0 2px 1px -1px rgba(0,0,0,.12);
+        }
+
+        .menu-side{
+            display: inline-block;
+            width: 20%;
+            background-color: #27292D;
+            height: 100px;
+            vertical-align: top;
+        }
+
+        .container{
+            display: inline-block;
+            width: 78%;
+        }
+
+        .job-container{
+            width: 50%;
+            margin: 50px auto 50px;
+            background-color: #27292D;
+            color: rgba(255, 255, 255, 0.65);
+            border-radius: 2px;
+            padding: 20px 0 20px 0;
+        }
+
+        .job-title{
+            color: #d69600;
+            padding: 5px 0 7px 10%;
+        }
+
+        .job-info{
+            padding: 3px 0 3px 10%;
+        }
+
+        .job-line{
+            width: 100%;
+            background-color: #d69600;
+            height: 1px;
+            margin: 20px 0 20px 0;
+        }
+
+        .job-more{
+            background-color: #d69600;
+            border-radius: 2px;
+            color: black;
+            text-decoration: none;
+            margin-left: 10%;
+            padding: 7px 0 5px 0;
+            width: 10%;
+            display: block;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .job-more:hover{
+            background-color: #B88100;
+        }
+
+        
 
        
     @media screen and (max-width: 992px) {
@@ -44,6 +111,34 @@
 </head>
 
 <body>
+
+    <div class="menu"></div>
+
+    <div class="menu-side"></div>
+    <div class="container">
+
+        {% for oppor in opportunities %}
+
+        <div class="job-container">
+            <div class="job-title">{{ oppor.title }}</div>
+            <div class="job-info">{{ oppor.opportunity|title }}</div>
+            <div class="job-info">{{ oppor.company }}</div>
+            {% if oppor.remote %}
+            <div class="job-info">Remote</div>
+            {% else %}
+            <div class="job-info">{{ oppor.location }}</div>
+            {% endif %}
+            {% if oppor.salary %}<div class="job-info">Salary: {{ oppor.salary }}</div>{% endif %}
+            <div class="job-line"></div>
+            <div class="job-more" data-code="{{ oppor.code }}">More</div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+    
+
+    {% comment %}
 
     {% for job_strengths_a  in job_strengths %}
   
@@ -90,12 +185,19 @@
 
     {% endfor %}
 
+    {% endcomment %}
+
               
 <script>
 
 $(document).ready(function(){
 
-   
+    $('.job-more').on('click', function(){
+        var code = this.attr('data-code');
+        console.log(code);
+    });
+
+
 
 });
 </script>

@@ -4,11 +4,26 @@ import json
 import requests
 from django.db.models import Q
 
+from .models import Opportunity
+
 # https://torre.bio/api/bios/$username (gets bio information of $username)
 # - GET https://torre.bio/api/people/$username/network?[deep=$limit] (lists people sorted by connection degrees relative to $username)
 # - GET https://torre.co/api/opportunities/$id (gets job information of $id)
 # - POST https://search.torre.co/opportunities/_search/?[offset=$offset&size=$size&aggregate=$aggregate] 
 # and https://search.torre.co/people/_search/?[offset=$offset&size=$size&aggregate=$aggregate] (search for jobs and people in general, you can see how it's being used here: https://torre.co/search).
+
+
+
+
+def list_jobs(request):
+
+    opportunities = Opportunity.objects.filter(active=True).all()
+
+    context = {
+        'opportunities': opportunities,
+	}
+
+    return render(request, 'show_info.html', context)
 
 
 def get_data(request):
