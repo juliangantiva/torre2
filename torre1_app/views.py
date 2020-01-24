@@ -149,21 +149,16 @@ def get_data(request):
     comp_maxamount = to_dollar_yearly(comp_maxamount, comp_currency, comp_periodicity)
 
     opportunities = r_user['opportunities']
-    print(opportunities)
     if opportunity == "employee":
-        oppo_currency   = opportunities[9]['data'][0:3]
-        oppo_amount     = opportunities[10]['data']
-        oppo_period     = opportunities[11]['data']
+        oppo_type = 'jobs'
 
     if opportunity == "freelancer":
-        oppo_currency   = opportunities[13]['data'][0:3]
-        oppo_amount     = opportunities[14]['data']
-        oppo_period     = opportunities[15]['data']
+        oppo_type = 'gigs'
 
     if opportunity == "intern":
-        oppo_currency   = opportunities[17]['data'][0:3]
-        oppo_amount     = opportunities[18]['data']
-        oppo_period     = opportunities[19]['data']
+        oppo_type = 'internships'
+
+    oppo_currency, oppo_amount, oppo_period = asign_values(opportunities,oppo_type)
 
     oppo_amount = to_dollar_yearly(oppo_amount, oppo_currency, oppo_period)
 
@@ -183,7 +178,7 @@ def get_data(request):
     job_salary['salary_ok'] = salary_ok
 
     ##############################
-    # Languaje
+    # Language
 
     languages_user   = r_user['languages']
     languages_job    =  r_job['languages']
@@ -207,16 +202,35 @@ def get_data(request):
         lang_job_a['accomplish'] = equal_languaje[ind]
 
     ##############################
+    # Connections
+
+    members = r_job['members']
 
     params = {'deep': '2'} # grados de conexion
     url = "https://torre.bio/api/people/{}/network".format(username)
-    r_conec = requests.get(url, params=params).json()
+    r = requests.get(url, params=params).json()
+    connections = r['graph']['nodes']
+
+    equal_connections = []
+    for member_a in members:
+        equal = False
+        for connection_a in connections:
+            if member_a['person']['username'] == connection_a['metadata']['publicId']:
+                equal = True
+
+        equal_connections.append(1) if equal else equal_connections.append(0)
+
+    for ind, member_a in enumerate(members):
+        member_a['accomplish'] = equal_connections[ind]
+
+    ##############################
 
     context = {
         'job_strengths': job_stren,
         'job_location': job_location,
         'job_salary': job_salary,
         'job_languages': languages_job,
+        'job_members': members,
 	}
 
     return render(request, 'show_info.html', context)
@@ -256,3 +270,15 @@ def languaje_fluency(fluency):
         fluency_num = 3
 
     return fluency_num
+
+def asign_values(opportunities,oppo_type):
+    for a in opportunities:
+        if a['interest'] == oppo_type:
+            if a['field'] == 'desirable-compensation-currency':
+                oppo_currency   = a['data'][0:3]
+            if a['field'] == 'desirable-compensation-amount':
+                oppo_amount     = a['data']
+            if a['field'] == 'desirable-compensation-periodicity':
+                oppo_period     = a['data']
+
+    return oppo_currency, oppo_amount, oppo_period

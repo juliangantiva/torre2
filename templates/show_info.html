@@ -80,6 +80,16 @@
 
     {% endfor %}
 
+    </br></br>
+
+    {% for job_member_a  in job_members %}
+
+        <div>{{job_member_a.person.name}}</div>
+        <div>{{job_member_a.person.professionalHeadline}}</div>
+        <div>{{job_member_a.accomplish}}</div>
+
+    {% endfor %}
+
               
 <script>
 
