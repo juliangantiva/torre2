@@ -1,1 +1,86 @@
-{{r}}
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Torre 1</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://use.fontawesome.com/1591af9028.js"></script>
+
+
+    <style>
+
+        *{
+            box-sizing: border-box;
+        }
+
+        body{
+            margin: 0;        
+        }
+
+        img{
+            max-width: 100%;
+        }
+
+
+       
+    @media screen and (max-width: 992px) {
+
+        
+
+
+    }
+
+    @media screen and (min-width: 768px) and (max-width: 992px){
+        
+
+    }
+
+    </style>
+
+
+</head>
+
+<body>
+
+    {% for job_strengths_a  in job_strengths %}
+  
+        <div>{{job_strengths_a.name}}</div>
+        <div>{{job_strengths_a.accomplish}}</div>
+
+    {% endfor %}
+
+    </br></br>
+
+    {{ job_location.remote }}
+    {{ job_location.timezones }}
+    {{ job_location.location_job }}
+    {{ job_location.time_ok }}
+    {{ job_location.location_ok }}
+
+    </br></br>
+
+    {{ job_salary.code }}
+    {{ job_salary.currency }}
+    {{ job_salary.minAmount }}
+    {{ job_salary.maxAmount }}
+    {{ job_salary.periodicity }}
+    {{ job_salary.opportunity }}
+    {{ job_salary.salary_ok }}
+
+              
+<script>
+
+$(document).ready(function(){
+
+   
+
+});
+</script>
+
+
+
+</body>
+</html>
