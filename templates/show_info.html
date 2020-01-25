@@ -87,7 +87,7 @@
             text-decoration: none;
             margin-left: 10%;
             padding: 7px 0 5px 0;
-            width: 10%;
+            width: 23%;
             display: block;
             text-align: center;
             cursor: pointer;
@@ -144,6 +144,10 @@
             margin: 0 5px 10px 0;
         }
 
+        .info-salary{
+            margin: 10px 5px 10px 0;
+        }
+
         /* -------------------------- */
 
         .seach-data input {
@@ -153,7 +157,7 @@
             display: inline-block;
             font: inherit;
             line-height: 1.5em;
-            padding: 0.5em 3.5em 0.5em 1em;
+            padding: 3px;
             color: #575757;
         }
 
@@ -262,7 +266,7 @@
         .job-more{
             margin-left: 5%;
             padding: 12px 0 10px 0;
-            width: 30%;
+            width: 50%;
         }
 
         /* Boxes with info ---------------------------*/
@@ -294,6 +298,10 @@
             font-size: 13px;
             padding: 10px 12px 8px 12px;
             margin: 0 5px 10px 0;
+        }
+
+        .info-salary{
+            margin: 10px 5px 10px 0;
         }
 
 
@@ -331,25 +339,7 @@
 
 <body>
 
-    <div class="menu">
-
-        <h3>Notes</h3>
-
-        <p>
-        This page shows a new way to show job offers to users. The idea is that users can see quickly how far they are from accomplish the main requirements for a job according to the data on their profiles. 
-        </p>
-        <p>
-        These are: skills (which ones the candidate has, and which ones doesn’t), location (if it’s remote, check time zone), salary (depending if it’s a job, freelance or internship) and language (depending on the level). Also, candidates can see if there is a connection with a company to see if someone can recommend her or him.
-        </p>
-        <p>
-        Firstly, there are two assumptions: the user is registered, and a list with opportunities is shown. For this, there are to inputs, one where you can enter a username, and one where you can add new opportunities adding the id.
-        </p>
-        <p>
-        As an example, there are already a job offer list that was added using databases, but more jobs can be added.
-        </p>
-            
-
-    </div>
+    <div class="menu"></div>
 
     <div class="menu-side">
         <div class="seach-data">
@@ -387,12 +377,40 @@
             {% endif %}
             {% if oppor.salary %}<div class="job-info">Salary: {{ oppor.salary }}</div>{% endif %}
             <div class="job-line"></div>
-            <div class="job-more" data-code="{{ oppor.code }}" data-load="0">More</div>
+            <div class="job-more" data-code="{{ oppor.code }}" data-load="0">See if it fits you</div>
 
             <div class="job-moreinfo" id="{{ oppor.code }}"></div>
         </div>
 
         {% endfor %}
+
+    </div>
+
+    <div class="menu">
+
+        <h3>Notes</h3>
+
+        <p>
+        This page shows a new way to show job offers to users. The idea is that users can see quickly how far they are from accomplishing the main requirements for a job according to the data on their profiles. 
+        </p>
+        <p>
+        What I did was to compare the data in a user profile with the data from a job offers
+        </p>
+        <p>
+        These are: skills (which ones the candidate has, and which ones doesn’t), location (if it’s remote, are you in the right time zone?), salary (depending if it’s a job, freelance or internship, Is it in your desired range?) and language (depending on the level, is it in your level?). Also, candidates can see if there is a connection with a company to see if someone can recommend her or him.
+        </p>
+        <p>
+        Firstly, there are two assumptions: the user is registered, and a list with opportunities is shown. For this, there are to inputs, one where you can enter a username, and one where you can add new opportunities adding the id.
+        </p>
+        <p>
+        As an example, there is already a job offer list that was added using databases, but more jobs can be added.
+        </p>
+        <p>
+        The code has bugs because there are many variations in the API responses depending on the user profile. I should have studied more carefully the responses to identify any possible variation. 
+        </p>
+            
+            
+            
 
     </div>
               
@@ -402,7 +420,7 @@ $(document).ready(function(){
 
     $('#id_username').on('click', function(){
         $('.job-more').attr('data-load','0');
-        $('.job-more').html('More');
+        $('.job-more').html('See if it fits you');
         $('.job-moreinfo').slideUp();
         $('.msg_user').html('');
     });
@@ -436,13 +454,13 @@ $(document).ready(function(){
                         $('#'+code).slideDown();
                     } else {
                         $('.msg_user').html('User not found');
-                        $more.html('More');
+                        $more.html('See if it fits you');
                     }
 
                 },
                 error: function(){
                     console.log('ajax error')
-                    $('.job-more').html('More');
+                    $('.job-more').html('See if it fits you');
                 }
             });
 
@@ -450,10 +468,10 @@ $(document).ready(function(){
 
             $('#'+code).slideToggle();
             var text = $more.text();
-            if (text === 'More') {
+            if (text === 'See if it fits you') {
                 $more.text('Less');
             } else {
-                $more.text('More');
+                $more.text('See if it fits you');
             }
 
         }
@@ -468,190 +486,202 @@ $(document).ready(function(){
         ///Skills////////////////////////////////////////////////////
 
         var jobStrengths = data.job_strengths;
-
         var htmlSkills1 = '';
-            
-        var htmlSkills2 = '';
-        var htmlSkills3 = '';
-        aux = '';
-        jobStrengths.forEach(function(value){
+        if (jobStrengths.error === undefined){
 
-            aux = '<div class="info-skill info-box">'+value.name+'</div>';
-            if (value.accomplish == '1') {
-                htmlSkills2 = htmlSkills2 + aux;
-            } else {
-                htmlSkills3 = htmlSkills3 + aux;
+            var htmlSkills2 = '';
+            var htmlSkills3 = '';
+            aux = '';
+            jobStrengths.forEach(function(value){
+
+                aux = '<div class="info-skill info-box">'+value.name+'</div>';
+                if (value.accomplish == '1') {
+                    htmlSkills2 = htmlSkills2 + aux;
+                } else {
+                    htmlSkills3 = htmlSkills3 + aux;
+                }
+
+            });
+
+            if (htmlSkills2 !== '') {
+                htmlSkills2 = '<div class="info-title2">You already have them:</div>' + htmlSkills2;
             }
 
-        });
+            if (htmlSkills3 !== '') {
+                htmlSkills3 = '<div class="info-title2">You need them:</div>' + htmlSkills3;
+            }
 
-        if (htmlSkills2 !== '') {
-            htmlSkills2 = '<div class="info-title2">You already have them:</div>' + htmlSkills2;
+            htmlSkills1 = htmlSkills2 + htmlSkills3;
+
+            htmlSkills1 = '<div class="info-div">'+
+            '<div class="info-title">Skills</div>'+
+            '<div class="info-linea2"></div>'+
+            htmlSkills1 +
+            '</div>';
+
         }
-
-        if (htmlSkills3 !== '') {
-            htmlSkills3 = '<div class="info-title2">You need them:</div>' + htmlSkills3;
-        }
-
-        htmlSkills1 = htmlSkills2 + htmlSkills3;
 
         ///Location////////////////////////////////////////////////////
 
         var jobLocation = data.job_location;
-
         var htmlLocation1 = '';
+        if (jobLocation.error === undefined){
 
-        var htmlLocation2 = '';
-        var htmlLocation3 = '';
-        if (jobLocation.remote == true) {
+            var htmlLocation2 = '';
+            var htmlLocation3 = '';
+            if (jobLocation.remote == true) {
 
-            aux = '';
-            if (jobLocation.time_ok == true) {
-                aux = 'You are in the right time zone.';
+                aux = '';
+                if (jobLocation.time_ok == true) {
+                    aux = 'You are in the right time zone.';
+                } else {
+                    aux = 'You are not in the right time zone.';
+                }
+                htmlLocation2 = '<div class="info-title2">'+aux+'</div>'+'<div class="info-remote info-box">Remote</div>';
+                htmlLocation3 = '<div class="info-time info-box">Time Zone: '+jobLocation.timezones[0]+' to '+jobLocation.timezones[1]+'</div>'; 
+                htmlLocation1 =  htmlLocation2 + htmlLocation3;
+            
             } else {
-                aux = 'You are not in the right time zone.';
-            }
-            htmlLocation2 = '<div class="info-title2">'+aux+'</div>'+'<div class="info-remote info-box">Remote</div>';
-            htmlLocation3 = '<div class="info-time info-box">Time Zone: '+jobLocation.timezones[0]+' to '+jobLocation.timezones[1]+'</div>'; 
-            htmlLocation1 =  htmlLocation2 + htmlLocation3;
-        
-        } else {
 
-            aux = '';
-            if (jobLocation.location_ok == true) {
-                aux = 'It is in your city.';
-            } else {
-                aux = 'Probably it is not close to you.';
+                aux = '';
+                if (jobLocation.location_ok == true) {
+                    aux = 'It is in your city.';
+                } else {
+                    aux = 'Probably it is not close to you.';
+                }
+                htmlLocation2 = '<div class="info-title2">'+aux+'</div>';
+                htmlLocation3 = '<div class="info-location info-box">'+jobLocation.location_job+'</div>';
+                htmlLocation1 =  htmlLocation2 + htmlLocation3;
             }
-            htmlLocation2 = '<div class="info-title2">'+aux+'</div>';
-            htmlLocation3 = '<div class="info-location info-box">'+jobLocation.location_job+'</div>';
-            htmlLocation1 =  htmlLocation2 + htmlLocation3;
+
+            htmlLocation1 = '<div class="info-div">'+
+            '<div class="info-title">Location</div>'+
+            '<div class="info-linea2"></div>'+
+            htmlLocation1 +
+            '</div>';
+
         }
 
         ///Salary////////////////////////////////////////////////////
 
         var jobSalary = data.job_salary;
-
         var htmlSalary1 = '';
+        if (jobSalary.error === undefined){
 
-        var htmlSalary2 = '';
-        var htmlSalary3 = '';
-        var htmlSalary4 = '';
-        if (jobSalary.salary_ok === 'blank') {
+            var htmlSalary2 = '';
+            var htmlSalary3 = '';
+            var htmlSalary4 = '';
+            if (jobSalary.salary_ok === 'blank') {
 
-            htmlSalary3 = '<div class="info-salary info-box">To be defined</div>';
+                htmlSalary3 = '<div class="info-salary info-box">To be defined</div>';
 
-        } else {
+            } else {
 
-            aux = '';
-            if (jobSalary.salary_ok === 'yes') {
-                aux = 'It is in your desired range.';
+                aux = '';
+                if (jobSalary.salary_ok === 'yes') {
+                    aux = 'It is in your desired range.';
+                }
+                if (jobSalary.salary_ok === 'not') {
+                    aux = 'It is not in your desired range.';
+                }
+                htmlSalary2 = '<div class="info-title2">'+aux+'</div>';
+
+                aux = jobSalary.currency + ' ' + jobSalary.minAmount;
+                if (jobSalary.maxAmount != '0') {
+                    aux = aux + ' - ' + jobSalary.maxAmount;
+                }
+                aux = aux + ' / ' + jobSalary.periodicity;
+                
+                htmlSalary3 = '<div class="info-salary info-box">'+aux+'</div>';
+
             }
-            if (jobSalary.salary_ok === 'not') {
-                aux = 'It is not in your desired range.';
-            }
-            htmlSalary2 = '<div class="info-title2">'+aux+'</div>';
 
-            aux = jobSalary.currency + ' ' + jobSalary.minAmount;
-            if (jobSalary.maxAmount != '0') {
-                aux = aux + ' - ' + jobSalary.maxAmount;
-            }
-            aux = aux + ' / ' + jobSalary.periodicity;
-            
-            htmlSalary3 = '<div class="info-salary info-box">'+aux+'</div>';
+            htmlSalary4 = '<div class="info-salary info-box">'+jobSalary.opportunity+'</div>';
+
+            htmlSalary1 = htmlSalary2 + htmlSalary3 + htmlSalary4;
+
+            htmlSalary1 = '<div class="info-div">'+
+            '<div class="info-title">Salary</div>'+
+            '<div class="info-linea2"></div>'+
+            htmlSalary1 +
+            '</div>';
 
         }
-
-        htmlSalary4 = '<div class="info-salary info-box">'+jobSalary.opportunity+'</div>';
-
-        htmlSalary1 = htmlSalary2 + htmlSalary3 + htmlSalary4;
 
         ///Language////////////////////////////////////////////////////
 
         var jobLanguages = data.job_languages;
-
         var htmlLanguages1 = '';
-            
-        var htmlLanguages2 = '';
-        var htmlLanguages3 = '';
-        aux = '';
-        jobLanguages.forEach(function(value){
+        if (jobLanguages.error === undefined){
+                
+            var htmlLanguages2 = '';
+            var htmlLanguages3 = '';
+            aux = '';
+            jobLanguages.forEach(function(value){
 
-            aux = '<div class="info-language info-box">'+value.language.name+' - '+value.fluency+'</div>';
-            if (value.accomplish == '1') {
-                htmlLanguages2 = htmlLanguages2 + aux;
-            } else {
-                htmlLanguages3 = htmlLanguages3 + aux;
+                aux = '<div class="info-language info-box">'+value.language.name+' - '+value.fluency+'</div>';
+                if (value.accomplish == '1') {
+                    htmlLanguages2 = htmlLanguages2 + aux;
+                } else {
+                    htmlLanguages3 = htmlLanguages3 + aux;
+                }
+
+            });
+
+            if (htmlLanguages2 !== '') {
+                htmlLanguages2 =  '<div class="info-title2">You have it.</div>' + htmlLanguages2;
             }
 
-        });
+            if (htmlLanguages3 !== '') {
+                htmlLanguages3 = '<div class="info-title2">You need it.</div>' + htmlLanguages3;
+            }
 
-        if (htmlLanguages2 !== '') {
-            htmlLanguages2 =  '<div class="info-title2">You have it.</div>' + htmlLanguages2;
+            htmlLanguages1 = htmlLanguages2 + htmlLanguages3;
+
+            htmlLanguages1 = '<div class="info-div">'+
+            '<div class="info-title">Language</div>'+
+            '<div class="info-linea2"></div>'+
+            htmlLanguages1 +
+            '</div>';
+
         }
-
-        if (htmlLanguages3 !== '') {
-            htmlLanguages3 = '<div class="info-title2">You need it.</div>' + htmlLanguages3;
-        }
-
-        htmlLanguages1 = htmlLanguages2 + htmlLanguages3;
 
         ///Connections////////////////////////////////////////////////////
 
         var jobMembers = data.job_members;
-
         var htmlMembers1 = '';
-            
-        var htmlMembers2 = '';
-        aux = '';
-        jobMembers.forEach(function(value){
+        if (jobMembers.error === undefined){
+                
+            var htmlMembers2 = '';
+            aux = '';
+            jobMembers.forEach(function(value){
 
-            aux = '<div class="info-member info-box">'+value.person.name+'</div>';
-            if (value.accomplish == '1') {
-                htmlMembers2 = htmlMembers2 + aux;
+                aux = '<div class="info-member info-box">'+value.person.name+'</div>';
+                if (value.accomplish == '1') {
+                    htmlMembers2 = htmlMembers2 + aux;
+                }
+
+            });
+
+            if (htmlMembers2 !== '') {
+                htmlMembers2 =  '<div class="info-title2">You probably know them or know someone who knows them:</div>' + htmlMembers2;
+            } else {
+                htmlMembers2 = '<div class="info-title2">At the moment you know nobody here.</div>'
             }
 
-        });
+            htmlMembers1 = htmlMembers2;
 
-        if (htmlMembers2 !== '') {
-            htmlMembers2 =  '<div class="info-title2">You probably know them or know someone who knows them:</div>' + htmlMembers2;
-        } else {
-            htmlMembers2 = '<div class="info-title2">At the moment you know nobody here.</div>'
-        }
-
-        htmlMembers1 = htmlMembers2;
-
-        ///////////////////////////////////////////////////////
-
-        var content = '<div class="info-div">'+
-            '<div class="info-title">Skills</div>'+
-            '<div class="info-linea2"></div>'+
-            htmlSkills1 +
-        '</div>'+
-
-        '<div class="info-div">'+
-            '<div class="info-title">Location</div>'+
-            '<div class="info-linea2"></div>'+
-            htmlLocation1 +
-        '</div>'+
-
-        '<div class="info-div">'+
-            '<div class="info-title">Salary</div>'+
-            '<div class="info-linea2"></div>'+
-            htmlSalary1 +
-        '</div>'+
-
-        '<div class="info-div">'+
-            '<div class="info-title">Language</div>'+
-            '<div class="info-linea2"></div>'+
-            htmlLanguages1 +
-        '</div>'+
-
-        '<div class="info-div">'+
+            htmlMembers1 = '<div class="info-div">'+
             '<div class="info-title">Members you know</div>'+
             '<div class="info-linea2"></div>'+
             htmlMembers1+
-        '</div>'
+            '</div>';
+
+        }
+
+        ///////////////////////////////////////////////////////
+
+        var content = htmlSkills1+htmlLocation1+htmlSalary1+htmlLanguages1+htmlMembers1
         
         return content;
     }
@@ -732,7 +762,7 @@ $(document).ready(function(){
             '<div class="job-info">'+location+'</div>'+
             '<div class="job-info">Salary: '+salary+'</div>'+
             '<div class="job-line"></div>'+
-            '<div class="job-more" data-code="'+code+'" data-load="0">More</div>'+
+            '<div class="job-more" data-code="'+code+'" data-load="0">See if it fits you</div>'+
             '<div class="job-moreinfo" id="'+code+'"></div>'+
         '</div>';
 
