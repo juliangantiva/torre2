@@ -14,6 +14,8 @@ from .models import Opportunity
 
 
 
+
+
 def list_jobs(request):
 
     opportunities = Opportunity.objects.filter(active=True).all().order_by('id')
@@ -24,11 +26,27 @@ def list_jobs(request):
 
     return render(request, 'show_info.html', context)
 
+def get_job(request):
+    if request.is_ajax():
+        job_id = request.GET.get('code')
+
+        url_job = "https://torre.co/api/opportunities/{}".format(job_id)
+
+        try:
+            data = requests.get(url_job).json()
+            data['error'] = False
+        except:
+            data = { 'error': True }
+
+        return JsonResponse(data)
+    
+    else:
+        raise Http404
 
 def get_data(request):
 
     #################################################################################
-    username = 'juliangantiva'
+    #username = 'juliangantiva'
     #username = 'manolo'
     #params_con = {'deep': '2'} # grados de conexion
     
@@ -72,183 +90,196 @@ def get_data(request):
 
     if request.is_ajax():
 
+        username = request.GET.get('username')
         job_id = request.GET.get('code')
 
         url_bio = "https://torre.bio/api/bios/{}".format(username)
         url_job = "https://torre.co/api/opportunities/{}".format(job_id)
-
+        
         r_user = requests.get(url_bio).json()
-        r_job = requests.get(url_job).json()
+        try:
+            r_user['message']
+            yesuser = False
+        except:
+            yesuser = True
 
-        # r = json.dumps(r_user)
-        # parsed = json.loads(r)
-        # print(json.dumps(parsed, indent=4, sort_keys=False))
-        
-        ##############################
-        # Skills
+        if yesuser:
 
-        user_stren  = r_user['strengths']
-        user_indus  = r_user['opportunities'][-1]['data']
-        job_stren   = r_job['strengths']
+            r_job = requests.get(url_job).json()
 
-        equal_stren = []
-        for job_stren_a in job_stren:
-            equal = False
-            for user_stren_a in user_stren:
-                if job_stren_a['code'] == user_stren_a['code']:
-                    equal = True
+            # r = json.dumps(r_user)
+            # parsed = json.loads(r)
+            # print(json.dumps(parsed, indent=4, sort_keys=False))
+            
 
-            equal_stren.append(1) if equal else equal_stren.append(0)
+            ##############################
+            # Skills
 
+            user_stren  = r_user['strengths']
+            user_indus  = r_user['opportunities'][-1]['data']
+            job_stren   = r_job['strengths']
 
-        for ind, job_stren_a in enumerate(job_stren):
-            if equal_stren[ind] == 0:
-                for user_indus_a in user_indus:
-                    if job_stren_a['name'] == user_indus_a['name']:
-                        equal_stren[ind] = 2
-
-        for ind, job_stren_a in enumerate(job_stren):
-            job_stren_a['accomplish'] = equal_stren[ind]
-
-        ##############################
-        # Location
-
-        timezones   = ''
-        location_job= ''
-        time_ok     = False
-        location_ok = False
-        remote      = False
-
-        job_place = r_job['place']
-        if job_place['remote'] == True:
-            remote = True
-            timezoneOffSet = int(r_user['person']['location']['timezoneOffSet'])/(1000*60*60)
-            timezones = r_job['timezones']
-            timezones_min = int(timezones[0][3:6])
-            timezones_max = int(timezones[1][3:6])
-            if timezoneOffSet >= timezones_min and timezoneOffSet <= timezones_max:
-                time_ok = True
-        else:
-            location_user = r_user['person']['location']['name']
-            location_job = r_job['place']['location'][0]['id']
-            if location_user == location_job:
-                location_ok = True
-
-        
-        job_location = {
-            'remote': remote,
-            'timezones': timezones,
-            'location_job': location_job,
-            'time_ok':time_ok,
-            'location_ok':location_ok,
-        } 
-
-        ##############################
-        # Salary
-
-        salary_ok = 'blank'
-
-        compensation    =  r_job['compensation']
-        comp_code       = compensation['code']
-        comp_currency   = compensation['currency'][0:3]
-        comp_minamount  = compensation['minAmount']
-        comp_maxamount  = compensation['maxAmount']
-        comp_periodicity= compensation['periodicity']
-        opportunity     =  r_job['opportunity']
-
-        comp_minamount = to_dollar_yearly(comp_minamount, comp_currency, comp_periodicity)
-        comp_maxamount = to_dollar_yearly(comp_maxamount, comp_currency, comp_periodicity)
-
-        opportunities = r_user['opportunities']
-        if opportunity == "employee":
-            oppo_type = 'jobs'
-
-        if opportunity == "freelancer":
-            oppo_type = 'gigs'
-
-        if opportunity == "intern":
-            oppo_type = 'internships'
-
-        oppo_currency, oppo_amount, oppo_period = asign_values(opportunities,oppo_type)
-
-        oppo_amount = to_dollar_yearly(oppo_amount, oppo_currency, oppo_period)
-
-        if comp_code == 'range':
-            if comp_minamount >= oppo_amount or comp_maxamount >= oppo_amount:
-                salary_ok = 'yes'
-            else:
-                salary_ok = 'not'
-
-
-        if comp_code == 'fixed':
-            if comp_minamount >= oppo_amount:
-                salary_ok = 'yes'
-            else:
-                salary_ok = 'not'
-
-        if comp_code == 'to-be-defined':
-            salary_ok = 'blank'
-
-        job_salary = r_job['compensation']
-        job_salary['opportunity'] = r_job['opportunity']
-        job_salary['salary_ok'] = salary_ok
-
-        ##############################
-        # Language
-
-        languages_user   = r_user['languages']
-        languages_job    =  r_job['languages']
-
-
-        equal_languaje = []
-        for lang_job_a in languages_job:
-            equal = False
-            for lang_user_a in languages_user:
-                if lang_job_a['language']['code'] == lang_user_a['code']:
-                    
-                    lang1 = languaje_fluency(lang_job_a['fluency'])
-                    lang2 = languaje_fluency(lang_user_a['fluency'])
-
-                    if lang1 <= lang2:
+            equal_stren = []
+            for job_stren_a in job_stren:
+                equal = False
+                for user_stren_a in user_stren:
+                    if job_stren_a['code'] == user_stren_a['code']:
                         equal = True
 
-            equal_languaje.append(1) if equal else equal_languaje.append(0)
+                equal_stren.append(1) if equal else equal_stren.append(0)
 
-        for ind, lang_job_a in enumerate(languages_job):
-            lang_job_a['accomplish'] = equal_languaje[ind]
 
-        ##############################
-        # Connections
+            for ind, job_stren_a in enumerate(job_stren):
+                if equal_stren[ind] == 0:
+                    for user_indus_a in user_indus:
+                        if job_stren_a['name'] == user_indus_a['name']:
+                            equal_stren[ind] = 2
 
-        members = r_job['members']
+            for ind, job_stren_a in enumerate(job_stren):
+                job_stren_a['accomplish'] = equal_stren[ind]
 
-        params = {'deep': '2'} # grados de conexion
-        url = "https://torre.bio/api/people/{}/network".format(username)
-        r = requests.get(url, params=params).json()
-        connections = r['graph']['nodes']
+            ##############################
+            # Location
 
-        equal_connections = []
-        for member_a in members:
-            equal = False
-            for connection_a in connections:
-                if member_a['person']['username'] == connection_a['metadata']['publicId']:
-                    equal = True
+            timezones   = ''
+            location_job= ''
+            time_ok     = False
+            location_ok = False
+            remote      = False
 
-            equal_connections.append(1) if equal else equal_connections.append(0)
+            job_place = r_job['place']
+            if job_place['remote'] == True:
+                remote = True
+                timezoneOffSet = int(r_user['person']['location']['timezoneOffSet'])/(1000*60*60)
+                timezones = r_job['timezones']
+                timezones_min = int(timezones[0][3:6])
+                timezones_max = int(timezones[1][3:6])
+                if timezoneOffSet >= timezones_min and timezoneOffSet <= timezones_max:
+                    time_ok = True
+            else:
+                location_user = r_user['person']['location']['name']
+                location_job = r_job['place']['location'][0]['id']
+                if location_user == location_job:
+                    location_ok = True
 
-        for ind, member_a in enumerate(members):
-            member_a['accomplish'] = equal_connections[ind]
+            
+            job_location = {
+                'remote': remote,
+                'timezones': timezones,
+                'location_job': location_job,
+                'time_ok':time_ok,
+                'location_ok':location_ok,
+            } 
 
-        ##############################
+            ##############################
+            # Salary
 
-        data = {
-            'job_strengths': job_stren,
-            'job_location': job_location,
-            'job_salary': job_salary,
-            'job_languages': languages_job,
-            'job_members': members,
-        }
+            salary_ok = 'blank'
 
+            compensation    =  r_job['compensation']
+            comp_code       = compensation['code']
+            comp_currency   = compensation['currency'][0:3]
+            comp_minamount  = compensation['minAmount']
+            comp_maxamount  = compensation['maxAmount']
+            comp_periodicity= compensation['periodicity']
+            opportunity     =  r_job['opportunity']
+
+            comp_minamount = to_dollar_yearly(comp_minamount, comp_currency, comp_periodicity)
+            comp_maxamount = to_dollar_yearly(comp_maxamount, comp_currency, comp_periodicity)
+
+            opportunities = r_user['opportunities']
+            if opportunity == "employee":
+                oppo_type = 'jobs'
+
+            if opportunity == "freelancer":
+                oppo_type = 'gigs'
+
+            if opportunity == "intern":
+                oppo_type = 'internships'
+
+            oppo_currency, oppo_amount, oppo_period = asign_values(opportunities,oppo_type)
+
+            oppo_amount = to_dollar_yearly(oppo_amount, oppo_currency, oppo_period)
+
+            if comp_code == 'range':
+                if comp_minamount >= oppo_amount or comp_maxamount >= oppo_amount:
+                    salary_ok = 'yes'
+                else:
+                    salary_ok = 'not'
+
+
+            if comp_code == 'fixed':
+                if comp_minamount >= oppo_amount:
+                    salary_ok = 'yes'
+                else:
+                    salary_ok = 'not'
+
+            if comp_code == 'to-be-defined':
+                salary_ok = 'blank'
+
+            job_salary = r_job['compensation']
+            job_salary['opportunity'] = r_job['opportunity']
+            job_salary['salary_ok'] = salary_ok
+
+            ##############################
+            # Language
+
+            languages_user   = r_user['languages']
+            languages_job    =  r_job['languages']
+
+
+            equal_languaje = []
+            for lang_job_a in languages_job:
+                equal = False
+                for lang_user_a in languages_user:
+                    if lang_job_a['language']['code'] == lang_user_a['code']:
+                        
+                        lang1 = languaje_fluency(lang_job_a['fluency'])
+                        lang2 = languaje_fluency(lang_user_a['fluency'])
+
+                        if lang1 <= lang2:
+                            equal = True
+
+                equal_languaje.append(1) if equal else equal_languaje.append(0)
+
+            for ind, lang_job_a in enumerate(languages_job):
+                lang_job_a['accomplish'] = equal_languaje[ind]
+
+            ##############################
+            # Connections
+
+            members = r_job['members']
+
+            params = {'deep': '2'} # grados de conexion
+            url = "https://torre.bio/api/people/{}/network".format(username)
+            r = requests.get(url, params=params).json()
+            connections = r['graph']['nodes']
+
+            equal_connections = []
+            for member_a in members:
+                equal = False
+                for connection_a in connections:
+                    if member_a['person']['username'] == connection_a['metadata']['publicId']:
+                        equal = True
+
+                equal_connections.append(1) if equal else equal_connections.append(0)
+
+            for ind, member_a in enumerate(members):
+                member_a['accomplish'] = equal_connections[ind]
+
+            ##############################
+
+            data = {
+                'job_strengths': job_stren,
+                'job_location': job_location,
+                'job_salary': job_salary,
+                'job_languages': languages_job,
+                'job_members': members,
+                'error': '',
+            }
+
+        else:
+            data = { 'error': 'nouser'}
         
 
         return JsonResponse(data)

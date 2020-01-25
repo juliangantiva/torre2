@@ -29,17 +29,19 @@
         .menu{
             width: 100%;
             background-color: #27292D;
-            height: 100px;
-            /* box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2); */
-            box-shadow: 0 1px 3px rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.14), 0 2px 1px -1px rgba(0,0,0,.12);
+            color: #488286;
+            padding: 20px 20% 20px 20%;
         }
 
         .menu-side{
             display: inline-block;
             width: 20%;
-            background-color: #27292D;
-            height: 100px;
             vertical-align: top;
+        }
+
+        .seach-data{
+            width: 80%;
+            margin: 100px auto 100px auto;
         }
 
         .container{
@@ -54,6 +56,10 @@
             color: rgba(255, 255, 255, 0.65);
             border-radius: 2px;
             padding: 20px 0 20px 0;
+        }
+
+        .job-none{
+            display: none;
         }
 
         .job-title{
@@ -138,15 +144,93 @@
             margin: 0 5px 10px 0;
         }
 
+        /* -------------------------- */
+
+        .seach-data input {
+            background-color: #f7f7f7;
+            border: solid 1px transparent;
+            border-radius: 5px;
+            display: inline-block;
+            font: inherit;
+            line-height: 1.5em;
+            padding: 0.5em 3.5em 0.5em 1em;
+            color: #575757;
+        }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            margin: 0; 
+        }
+
+        input[type=number] {
+            -moz-appearance:textfield;
+        }
+
+        .seach-data input:focus {
+            border-color: transparent;
+            outline: 0;
+        }
+
+        .seach-data label{
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 18px;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .form_camp {
+            margin: 30px;
+            background-color: #27292D;
+            padding: 20px;
+            border-radius: 2px;
+        }
+
+        .form_camp input {
+            width: 100%;
+        }
+
+        .add-job{
+            background-color: #d69600;
+            border-radius: 2px;
+            color: black;
+            text-decoration: none;
+            padding: 7px 0 5px 0;
+            display: block;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 0;
+            margin-top: 10px;
+            font-size: 16px;
+            width: 60%;
+        }
+
+        .add-job:hover{
+            background-color: #B88100;
+        }
+
+        .msg{
+            padding-top: 10px;
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+
        
     @media screen and (max-width: 992px) {
 
         .menu{
-            height: 40px;
+            padding: 20px 3% 20px 3%;
         }
 
         .menu-side{
-            display: none;
+            display: block;
+            width: 100%;
+        }
+
+        .seach-data{
+            width: 80%;
+            margin: 50px auto 50px auto;
         }
 
         .container{
@@ -213,6 +297,26 @@
         }
 
 
+        /* ---------------------- */
+        .form_camp{
+            padding: 20px;
+            display: block;
+            width: 100%;
+            border-radius: 2px;
+            margin: 30px auto 30px auto;
+            background-color: #27292D;
+        }
+
+        .form_camp input {
+            width: 100%;
+        }
+
+        .add-job{
+            padding: 12px 10px 10px 10px;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
     }
 
     @media screen and (min-width: 768px) and (max-width: 992px){
@@ -227,16 +331,52 @@
 
 <body>
 
-    <div class="menu"></div>
+    <div class="menu">
 
-    <div class="menu-side"></div>
+        <h3>Notes</h3>
+
+        <p>
+        This page shows a new way to show job offers to users. The idea is that users can see quickly how far they are from accomplish the main requirements for a job according to the data on their profiles. 
+        </p>
+        <p>
+        These are: skills (which ones the candidate has, and which ones doesn’t), location (if it’s remote, check time zone), salary (depending if it’s a job, freelance or internship) and language (depending on the level). Also, candidates can see if there is a connection with a company to see if someone can recommend her or him.
+        </p>
+        <p>
+        Firstly, there are two assumptions: the user is registered, and a list with opportunities is shown. For this, there are to inputs, one where you can enter a username, and one where you can add new opportunities adding the id.
+        </p>
+        <p>
+        As an example, there are already a job offer list that was added using databases, but more jobs can be added.
+        </p>
+            
+
+    </div>
+
+    <div class="menu-side">
+        <div class="seach-data">
+            <div class="form_camp">
+                <label for="id_username">Username:</label><span id="e_username"></span>
+                <input type="text" name="username" id="id_username" maxlength="120" value="manolo"/>
+            
+                <div class="msg msg_user"></div>
+            </div>
+            <div class="form_camp">
+                <label for="id_job">Job code:</label><span id="e_job"></span>
+                <input type="text" name="job" id="id_job" maxlength="120" value="QweRLKd9"/>
+                <button type="submit" class="add-job" id="add-job" data-url="{% url 'get_job' %}">Add a job</button>
+            
+                <div class="msg msg_job"></div>
+            </div>
+        </div>
+
+    </div>
+
     <div class="container">
 
         <input type="hidden" id="url-get-data" data-url-job="{% url 'get_data' %}" >
 
         {% for oppor in opportunities %}
 
-        <div class="job-container">
+        <div class="job-container cont_{{ oppor.code }}">
             <div class="job-title">{{ oppor.title }}</div>
             <div class="job-info">{{ oppor.opportunity|title }}</div>
             <div class="job-info">{{ oppor.company }}</div>
@@ -260,13 +400,21 @@
 
 $(document).ready(function(){
 
-    
+    $('#id_username').on('click', function(){
+        $('.job-more').attr('data-load','0');
+        $('.job-more').html('More');
+        $('.job-moreinfo').slideUp();
+        $('.msg_user').html('');
+    });
 
-    $('.job-more').on('click', function(){
+    $(document).on('click', '.job-more', function(){
 
         var $more = $(this);
         var code = $more.attr('data-code');
         var load_box = $more.attr('data-load');
+        $('.msg_user').html('');
+
+        var username = $('#id_username').val();
 
         if (load_box === '0') {
 
@@ -276,15 +424,20 @@ $(document).ready(function(){
             $.ajax({
                 url: url,
                 type: 'GET',
-                data: {code: code},
+                data: {code: code, username: username},
                 success: function(data) {
                     
-                    $more.html('Less');
-                    $more.attr('data-load','1');
+                    if (data.error == '') {
+                        $more.html('Less');
+                        $more.attr('data-load','1');
 
-                    var content = moreinfo(data);
-                    $('#'+code).html(content);
-                    $('#'+code).slideDown();
+                        var content = moreinfo(data);
+                        $('#'+code).html(content);
+                        $('#'+code).slideDown();
+                    } else {
+                        $('.msg_user').html('User not found');
+                        $more.html('More');
+                    }
 
                 },
                 error: function(){
@@ -501,6 +654,89 @@ $(document).ready(function(){
         '</div>'
         
         return content;
+    }
+
+
+    $('.add-job').on('click', function(){
+        var code = $('#id_job').val();
+        var $job = $(this);
+        $('.msg_job').html('');
+
+        $job.html('<i class="fa fa-spinner fa-spin btn_loader"></i>');
+        var url = $job.attr('data-url');
+        
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: {code: code},
+            success: function(data) {
+                
+                $job.html('Add a job');
+
+                if (data.error == false) {
+                    var content = add_job(data);
+                    $('.cont_'+content[1]).remove();
+                    $('.container').prepend(content[0]);
+                    $('.cont_'+content[1]).slideDown();
+                } else {
+                    $('.msg_job').html('Job not found');
+                }
+
+            },
+            error: function(){
+                console.log('ajax error')
+                $job.html('Add a job');
+            }
+        });
+        
+    });
+
+    function add_job(data){
+
+        console.log(data);
+
+        var title = data.objective;
+        var opportunity = data.opportunity;
+        opportunity = opportunity.charAt(0).toUpperCase() + opportunity.substr(1).toLowerCase()
+        var company = data.organizations[0].name;
+
+        var remote = data.place.remote;
+        var location = 'Remote';
+        if (remote == false){
+            location = data.place.location[0].id;
+        }
+
+        var currency = data.compensation.currency;
+        var minAmount = data.compensation.minAmount;
+        var maxAmount = data.compensation.maxAmount;
+        var periodicity = data.compensation.periodicity;
+        var salary = '';
+        if (minAmount == '0') {
+            salary = 'To be defined';
+        } else {
+            var aux = '';
+            if (maxAmount == '0'){
+                aux = ''
+            } else {
+                aux = ' - '+maxAmount;
+            }
+            salary = currency+' '+minAmount+aux+' / '+periodicity;
+        }
+
+        var code = data.id;
+
+        var job = '<div class="job-container job-none cont_'+code+'">'+
+            '<div class="job-title">'+title+'</div>'+
+            '<div class="job-info">'+opportunity+'</div>'+
+            '<div class="job-info">'+company+'</div>'+
+            '<div class="job-info">'+location+'</div>'+
+            '<div class="job-info">Salary: '+salary+'</div>'+
+            '<div class="job-line"></div>'+
+            '<div class="job-more" data-code="'+code+'" data-load="0">More</div>'+
+            '<div class="job-moreinfo" id="'+code+'"></div>'+
+        '</div>';
+
+        return [job, code];
     }
 
 

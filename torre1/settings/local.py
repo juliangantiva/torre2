@@ -27,7 +27,7 @@ DEBUG = True
 
 ADMINS = [('Julian', 'juliangantiva@voofit.com')]
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'info@voofit.com'

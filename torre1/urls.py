@@ -18,12 +18,13 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
-from torre1_app.views import get_data, list_jobs
+from torre1_app.views import get_data, list_jobs, get_job
 
 urlpatterns = [
 
     path('', list_jobs, name='list_jobs'),
     path('get-data', get_data, name='get_data'),
+    path('get-job', get_job, name='get_job'),
 
     path('admin/', admin.site.urls),
 ]
