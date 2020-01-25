@@ -58,11 +58,13 @@
 
         .job-title{
             color: #d69600;
-            padding: 5px 0 7px 10%;
+            padding: 5px 10% 7px 10%;
+            font-size: 18px;
         }
 
         .job-info{
-            padding: 3px 0 3px 10%;
+            padding: 3px 10% 3px 10%;
+            font-size: 16px;
         }
 
         .job-line{
@@ -90,12 +92,125 @@
             background-color: #B88100;
         }
 
-        
+        .btn_loader{
+            color: white;
+        }
+
+        /* Boxes with info ---------------------------*/
+        .job-moreinfo{
+            padding: 40px 30px 0 30px;
+            width: 100%;
+            display: none;
+        }
+
+        .info-div{
+            width: 100%;
+            padding: 0 0 30px 0;
+        }
+
+        .info-title{
+            color: #d69600;
+            font-size: 22px;
+            width: 100%;
+        }
+
+        .info-linea2{
+            width: 35%;
+            background-color: #d69600;
+            height: 1px;
+            margin-top: 5px;
+        }
+
+        .info-title2{
+            font-size: 16px;
+            padding: 10px 0 10px 20px;
+        }
+
+        .info-box{
+            background-color: rgba(255, 255, 255, 0.16);
+            border: 1px solid #488286;
+            border-radius: 32px;
+            display: inline-block;
+            font-size: 13px;
+            line-height: 16px;
+            padding: 10px 12px 8px 12px;
+            color: white;
+            margin: 0 5px 10px 0;
+        }
 
        
     @media screen and (max-width: 992px) {
 
-        
+        .menu{
+            height: 40px;
+        }
+
+        .menu-side{
+            display: none;
+        }
+
+        .container{
+            display: block;
+            width: 100%;
+        }
+
+        .job-container{
+            width: 95%;
+            margin: 30px auto 30px auto;
+            padding: 20px 0 20px 0;
+        }
+
+        .job-title{
+            padding: 5px 5% 7px 5%;
+            font-size: 18px;
+        }
+
+        .job-info{
+            padding: 3px 5% 3px 5%;
+            font-size: 16px;
+        }
+
+        .job-line{
+            width: 100%;
+            margin: 20px 0 20px 0;
+        }
+
+        .job-more{
+            margin-left: 5%;
+            padding: 12px 0 10px 0;
+            width: 30%;
+        }
+
+        /* Boxes with info ---------------------------*/
+        .job-moreinfo{
+            padding: 40px 10px 0 10px;
+        }
+
+        .info-div{
+            padding: 0 0 30px 0;
+        }
+
+        .info-title{
+            font-size: 22px;
+            padding-left: 10px;
+        }
+
+        .info-linea2{
+            width: 35%;
+            margin-top: 5px;
+            margin-left: 10px;
+        }
+
+        .info-title2{
+            font-size: 16px;
+            padding: 10px 0 10px 20px;
+        }
+
+        .info-box{
+            font-size: 13px;
+            padding: 10px 12px 8px 12px;
+            margin: 0 5px 10px 0;
+        }
 
 
     }
@@ -117,6 +232,8 @@
     <div class="menu-side"></div>
     <div class="container">
 
+        <input type="hidden" id="url-get-data" data-url-job="{% url 'get_data' %}" >
+
         {% for oppor in opportunities %}
 
         <div class="job-container">
@@ -130,73 +247,261 @@
             {% endif %}
             {% if oppor.salary %}<div class="job-info">Salary: {{ oppor.salary }}</div>{% endif %}
             <div class="job-line"></div>
-            <div class="job-more" data-code="{{ oppor.code }}">More</div>
+            <div class="job-more" data-code="{{ oppor.code }}" data-load="0">More</div>
+
+            <div class="job-moreinfo" id="{{ oppor.code }}"></div>
         </div>
 
         {% endfor %}
 
     </div>
-    
-
-    {% comment %}
-
-    {% for job_strengths_a  in job_strengths %}
-  
-        <div>{{job_strengths_a.name}}</div>
-        <div>{{job_strengths_a.accomplish}}</div>
-
-    {% endfor %}
-
-    </br></br>
-
-    {{ job_location.remote }}
-    {{ job_location.timezones }}
-    {{ job_location.location_job }}
-    {{ job_location.time_ok }}
-    {{ job_location.location_ok }}
-
-    </br></br>
-
-    {{ job_salary.code }}
-    {{ job_salary.currency }}
-    {{ job_salary.minAmount }}
-    {{ job_salary.maxAmount }}
-    {{ job_salary.periodicity }}
-    {{ job_salary.opportunity }}
-    {{ job_salary.salary_ok }}
-
-    </br></br>
-
-    {% for job_languages_a  in job_languages %}
-  
-        <div>{{job_languages_a.language.name}}</div>
-        <div>{{job_languages_a.fluency}}</div>
-        <div>{{job_languages_a.accomplish}}</div>
-
-    {% endfor %}
-
-    </br></br>
-
-    {% for job_member_a  in job_members %}
-
-        <div>{{job_member_a.person.name}}</div>
-        <div>{{job_member_a.person.professionalHeadline}}</div>
-        <div>{{job_member_a.accomplish}}</div>
-
-    {% endfor %}
-
-    {% endcomment %}
-
               
 <script>
 
 $(document).ready(function(){
 
+    
+
     $('.job-more').on('click', function(){
-        var code = this.attr('data-code');
-        console.log(code);
+
+        var $more = $(this);
+        var code = $more.attr('data-code');
+        var load_box = $more.attr('data-load');
+
+        if (load_box === '0') {
+
+            $more.html('<i class="fa fa-spinner fa-spin btn_loader"></i>');
+            var url = $('#url-get-data').attr('data-url-job');
+            
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: {code: code},
+                success: function(data) {
+                    
+                    $more.html('Less');
+                    $more.attr('data-load','1');
+
+                    var content = moreinfo(data);
+                    $('#'+code).html(content);
+                    $('#'+code).slideDown();
+
+                },
+                error: function(){
+                    console.log('ajax error')
+                    $('.job-more').html('More');
+                }
+            });
+
+        } else {
+
+            $('#'+code).slideToggle();
+            var text = $more.text();
+            if (text === 'More') {
+                $more.text('Less');
+            } else {
+                $more.text('More');
+            }
+
+        }
+
     });
 
+    function moreinfo(data){
+
+        console.log(data);
+
+        var aux = '';
+        ///Skills////////////////////////////////////////////////////
+
+        var jobStrengths = data.job_strengths;
+
+        var htmlSkills1 = '';
+            
+        var htmlSkills2 = '';
+        var htmlSkills3 = '';
+        aux = '';
+        jobStrengths.forEach(function(value){
+
+            aux = '<div class="info-skill info-box">'+value.name+'</div>';
+            if (value.accomplish == '1') {
+                htmlSkills2 = htmlSkills2 + aux;
+            } else {
+                htmlSkills3 = htmlSkills3 + aux;
+            }
+
+        });
+
+        if (htmlSkills2 !== '') {
+            htmlSkills2 = '<div class="info-title2">You already have them:</div>' + htmlSkills2;
+        }
+
+        if (htmlSkills3 !== '') {
+            htmlSkills3 = '<div class="info-title2">You need them:</div>' + htmlSkills3;
+        }
+
+        htmlSkills1 = htmlSkills2 + htmlSkills3;
+
+        ///Location////////////////////////////////////////////////////
+
+        var jobLocation = data.job_location;
+
+        var htmlLocation1 = '';
+
+        var htmlLocation2 = '';
+        var htmlLocation3 = '';
+        if (jobLocation.remote == true) {
+
+            aux = '';
+            if (jobLocation.time_ok == true) {
+                aux = 'You are in the right time zone.';
+            } else {
+                aux = 'You are not in the right time zone.';
+            }
+            htmlLocation2 = '<div class="info-title2">'+aux+'</div>'+'<div class="info-remote info-box">Remote</div>';
+            htmlLocation3 = '<div class="info-time info-box">Time Zone: '+jobLocation.timezones[0]+' to '+jobLocation.timezones[1]+'</div>'; 
+            htmlLocation1 =  htmlLocation2 + htmlLocation3;
+        
+        } else {
+
+            aux = '';
+            if (jobLocation.location_ok == true) {
+                aux = 'It is in your city.';
+            } else {
+                aux = 'Probably it is not close to you.';
+            }
+            htmlLocation2 = '<div class="info-title2">'+aux+'</div>';
+            htmlLocation3 = '<div class="info-location info-box">'+jobLocation.location_job+'</div>';
+            htmlLocation1 =  htmlLocation2 + htmlLocation3;
+        }
+
+        ///Salary////////////////////////////////////////////////////
+
+        var jobSalary = data.job_salary;
+
+        var htmlSalary1 = '';
+
+        var htmlSalary2 = '';
+        var htmlSalary3 = '';
+        var htmlSalary4 = '';
+        if (jobSalary.salary_ok === 'blank') {
+
+            htmlSalary3 = '<div class="info-salary info-box">To be defined</div>';
+
+        } else {
+
+            aux = '';
+            if (jobSalary.salary_ok === 'yes') {
+                aux = 'It is in your desired range.';
+            }
+            if (jobSalary.salary_ok === 'not') {
+                aux = 'It is not in your desired range.';
+            }
+            htmlSalary2 = '<div class="info-title2">'+aux+'</div>';
+
+            aux = jobSalary.currency + ' ' + jobSalary.minAmount;
+            if (jobSalary.maxAmount != '0') {
+                aux = aux + ' - ' + jobSalary.maxAmount;
+            }
+            aux = aux + ' / ' + jobSalary.periodicity;
+            
+            htmlSalary3 = '<div class="info-salary info-box">'+aux+'</div>';
+
+        }
+
+        htmlSalary4 = '<div class="info-salary info-box">'+jobSalary.opportunity+'</div>';
+
+        htmlSalary1 = htmlSalary2 + htmlSalary3 + htmlSalary4;
+
+        ///Language////////////////////////////////////////////////////
+
+        var jobLanguages = data.job_languages;
+
+        var htmlLanguages1 = '';
+            
+        var htmlLanguages2 = '';
+        var htmlLanguages3 = '';
+        aux = '';
+        jobLanguages.forEach(function(value){
+
+            aux = '<div class="info-language info-box">'+value.language.name+' - '+value.fluency+'</div>';
+            if (value.accomplish == '1') {
+                htmlLanguages2 = htmlLanguages2 + aux;
+            } else {
+                htmlLanguages3 = htmlLanguages3 + aux;
+            }
+
+        });
+
+        if (htmlLanguages2 !== '') {
+            htmlLanguages2 =  '<div class="info-title2">You have it.</div>' + htmlLanguages2;
+        }
+
+        if (htmlLanguages3 !== '') {
+            htmlLanguages3 = '<div class="info-title2">You need it.</div>' + htmlLanguages3;
+        }
+
+        htmlLanguages1 = htmlLanguages2 + htmlLanguages3;
+
+        ///Connections////////////////////////////////////////////////////
+
+        var jobMembers = data.job_members;
+
+        var htmlMembers1 = '';
+            
+        var htmlMembers2 = '';
+        aux = '';
+        jobMembers.forEach(function(value){
+
+            aux = '<div class="info-member info-box">'+value.person.name+'</div>';
+            if (value.accomplish == '1') {
+                htmlMembers2 = htmlMembers2 + aux;
+            }
+
+        });
+
+        if (htmlMembers2 !== '') {
+            htmlMembers2 =  '<div class="info-title2">You probably know them or know someone who knows them:</div>' + htmlMembers2;
+        } else {
+            htmlMembers2 = '<div class="info-title2">At the moment you know nobody here.</div>'
+        }
+
+        htmlMembers1 = htmlMembers2;
+
+        ///////////////////////////////////////////////////////
+
+        var content = '<div class="info-div">'+
+            '<div class="info-title">Skills</div>'+
+            '<div class="info-linea2"></div>'+
+            htmlSkills1 +
+        '</div>'+
+
+        '<div class="info-div">'+
+            '<div class="info-title">Location</div>'+
+            '<div class="info-linea2"></div>'+
+            htmlLocation1 +
+        '</div>'+
+
+        '<div class="info-div">'+
+            '<div class="info-title">Salary</div>'+
+            '<div class="info-linea2"></div>'+
+            htmlSalary1 +
+        '</div>'+
+
+        '<div class="info-div">'+
+            '<div class="info-title">Language</div>'+
+            '<div class="info-linea2"></div>'+
+            htmlLanguages1 +
+        '</div>'+
+
+        '<div class="info-div">'+
+            '<div class="info-title">Members you know</div>'+
+            '<div class="info-linea2"></div>'+
+            htmlMembers1+
+        '</div>'
+        
+        return content;
+    }
 
 
 });
