@@ -1,0 +1,31 @@
+<script>
+
+    $(document).ready(function(){ 
+
+        $('#add-sev-jobs').on('click', function(){
+            var size = $('#id_size').val();
+            var offset = $('#id_offset').val();
+            var $job = $(this);
+            $('.msg-sev-jobs').html('');
+
+            if (size === '' || offset === '') {
+                $('.msg-sev-jobs').html('Complete both fields');
+            } else {
+                if (size < 1 || size > 100) {
+                    $('.msg-sev-jobs').html('Size must be between 1 and 100');
+                } else {
+                    if (offset < 0 || offset > 5000) {
+                        $('.msg-sev-jobs').html('Offset must be between 0 and 5000');
+                    } else {
+                        $job.html('<i class="fa fa-spinner fa-spin btn_loader"></i>');
+                        var url = $job.attr('data-url');
+                        url = url + size + '/' + offset;
+                        window.location.href = url;
+                    }
+                }
+            }
+        });
+
+
+    });
+</script>

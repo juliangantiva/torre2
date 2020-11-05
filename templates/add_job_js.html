@@ -1,0 +1,99 @@
+<script>
+
+    $(document).ready(function(){ 
+    
+        $('#add-job').on('click', function(){
+            var code = $('#id_job').val();
+            var $job = $(this);
+            $('.msg_job').html('');
+    
+            $job.html('<i class="fa fa-spinner fa-spin btn_loader"></i>');
+            var url = $job.attr('data-url');
+            
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: {code: code},
+                success: function(data) {
+                    
+                    $job.html('Add a job');
+    
+                    if (data.error == false) {
+                        var content = add_job(data);
+                        $('.cont_'+content[1]).remove();
+                        $('.container').prepend(content[0]);
+                        $('.cont_'+content[1]).slideDown();
+                    } else {
+                        $('.msg_job').html('Job not found');
+                    }
+    
+                },
+                error: function(){
+                    console.log('ajax error')
+                    $job.html('Add a job');
+                }
+            });
+            
+        });
+    
+        function add_job(data){
+    
+            var title = data.title;
+            var opportunity = data.opportunity;
+            opportunity = opportunity.charAt(0).toUpperCase() + opportunity.substr(1).toLowerCase()
+            
+            var companiesHtml = '';
+            data.companies.forEach(function(value){
+                companiesHtml = companiesHtml + '<div class="job-info">'+value+'</div>';
+            });
+    
+    
+            var remote = data.remote;
+            var locationsHtml = '<div class="job-info">Remote</div>';
+            if (remote == false && data.locations.length != 0){
+                locationsHtml = '';
+                data.locations.forEach(function(value){
+                    locationsHtml = locationsHtml + '<div class="job-info">'+value+'</div>';
+                });
+            }
+    
+            var salaryHTML = '';
+            if (data.salary != null) {
+                if (data.salary.visible == true) {
+                    var salaryCode = data.salary.code
+                    var currency = data.salary.currency;
+                    var minAmount = data.salary.min_amount;
+                    var maxAmount = data.salary.max_amount;
+                    var periodicity = data.salary.periodicity;
+    
+                    var salaryHTMLAux = ''
+                    if (salaryCode == 'range') {
+                        salaryHTMLAux = currency + ' ' + minAmount + ' - ' + maxAmount + ' /' + periodicity;
+                        salaryHTML = '<div class="job-info">Salary: '+ salaryHTMLAux +'</div>';
+                    }
+                    if (salaryCode == 'fixed') {
+                        salaryHTMLAux = currency + ' ' + minAmount + ' /' + periodicity;
+                        salaryHTML = '<div class="job-info">Salary: '+ salaryHTMLAux +'</div>';
+                    }
+                }
+            }
+    
+            var code = data.code;
+    
+            var job = '<div class="job-container job-none cont_'+code+'">'+
+                '<div class="job-title">'+title+'</div>'+
+                '<div class="job-info">'+opportunity+'</div>'+
+                companiesHtml+
+                locationsHtml+
+                salaryHTML+
+                '<div class="job-line"></div>'+
+                '<div class="job-more" data-code="'+code+'" data-load="0">See if it fits you</div>'+
+                '<div class="job-moreinfo" id="'+code+'"></div>'+
+            '</div>';
+    
+            return [job, code];
+        }
+    
+    
+    });
+</script>

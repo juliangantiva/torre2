@@ -61,19 +61,19 @@
             <div class="job-info">{{ company }}</div>
             {% endfor %}
             {% if oppor.remote %}
-            <div class="job-info">Remote</div>
+            <div class="job-info job-info-2">Remote</div>
             {% else %}
                 {% for location in oppor.locations %}
-                <div class="job-info">{{ location }}</div>
+                <div class="job-info job-info-2">{{ location }}</div>
                 {% endfor %}
             {% endif %}
             {% if oppor.salary %}
                 {% if oppor.salary.visible %}
                     {% if oppor.salary.code == 'range' %}
-                    <div class="job-info">Salary: {{oppor.salary.currency}} {{oppor.salary.min_amount|intcomma}} - {{oppor.salary.max_amount|intcomma}} /{{oppor.salary.periodicity}}</div>
+                    <div class="job-info job-info-3">Salary: {{oppor.salary.currency}} {{oppor.salary.min_amount|intcomma}} - {{oppor.salary.max_amount|intcomma}} /{{oppor.salary.periodicity}}</div>
                     {% endif %}
                     {% if oppor.salary.code == 'fixed' %}
-                    <div class="job-info">Salary: {{oppor.salary.currency}} {{oppor.salary.min_amount|intcomma}} /{{oppor.salary.periodicity}}</div>
+                    <div class="job-info job-info-3">Salary: {{oppor.salary.currency}} {{oppor.salary.min_amount|intcomma}} /{{oppor.salary.periodicity}}</div>
                     {% endif %}
                 {% endif %}
             {% endif %}
@@ -98,17 +98,16 @@
         What I did was to compare the data in a user profile with the data from a job offers
         </p>
         <p>
-        These are: skills (which ones the candidate has, and which ones doesn’t), location (if it’s remote, are you in the right time zone?), salary (depending if it’s a job, freelance or internship, Is it in your desired range?) and language (depending on the level, is it in your level?). Also, candidates can see if there is a connection with a company to see if someone can recommend her or him.
+        These are: skills (which ones the candidate has, which ones doesn’t and which ones must be interested for her or him), location (if it’s remote, are you in the right time zone?, if not, are you close to the place?), salary (depending if it’s a job, freelance or internship, Is it in your desired range?) and language (depending on the level, is it in your level?). Also, candidates can see if there is a connection with a company to see if someone can recommend her or him.
         </p>
         <p>
-        Firstly, there are two assumptions: the user is registered, and a list with opportunities is shown. For this, there are to inputs, one where you can enter a username, and one where you can add new opportunities adding the id.
+        Firstly, there are two assumptions: the user is registered, and a list with opportunities is shown. For this, there are four inputs, one where you can enter a username, and one where you can add new opportunities adding the id and two where you can change the size and offset of the opportunities shown.
         </p>
         <p>
-        As an example, there is already a job offer list that was added using databases, but more jobs can be added.
+        As an example, there is already a job offer list that was added calling the Torre API, but more jobs can be added.
         </p>
         <p>
-        The code has bugs because there are many variations in the API responses depending on the user profile. I should have studied more carefully the responses to identify any possible variation. 
-        </p>
+
             
             
             
@@ -116,6 +115,8 @@
     </div>
 
     {% include 'show_info_js.html' %}
+    {% include 'add_job_js.html' %}
+    {% include 'add_sev_jobs_js.html' %}
 
 
 </body>
