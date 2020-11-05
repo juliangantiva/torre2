@@ -1,0 +1,355 @@
+<style>
+
+    *{
+        box-sizing: border-box;
+    }
+
+    body{
+        margin: 0;
+        background-color: #010101;  
+        font-family: Muli,Helvetica,Arial,sans-serif;      
+    }
+
+    img{
+        max-width: 100%;
+    }
+
+    .menu{
+        width: 100%;
+        background-color: #27292D;
+        color: #488286;
+        padding: 20px 20% 20px 20%;
+    }
+
+    .menu-side{
+        display: inline-block;
+        width: 20%;
+        vertical-align: top;
+    }
+
+    .seach-data{
+        width: 80%;
+        margin: 100px auto 100px auto;
+    }
+
+    .container{
+        display: inline-block;
+        width: 78%;
+    }
+
+    .job-container{
+        width: 50%;
+        margin: 50px auto 50px;
+        background-color: #27292D;
+        color: rgba(255, 255, 255, 0.65);
+        border-radius: 2px;
+        padding: 20px 0 20px 0;
+    }
+
+    .job-none{
+        display: none;
+    }
+
+    .job-title{
+        color: #cddc39;
+        padding: 5px 10% 7px 10%;
+        font-size: 18px;
+    }
+
+    .job-info{
+        padding: 3px 10% 3px 10%;
+        font-size: 16px;
+    }
+
+    .job-line{
+        width: 100%;
+        background-color: #cddc39;
+        height: 1px;
+        margin: 20px 0 20px 0;
+    }
+
+    .job-more{
+        background-color: #cddc39;
+        border-radius: 2px;
+        color: black;
+        text-decoration: none;
+        margin-left: 10%;
+        padding: 7px 0 5px 0;
+        width: 23%;
+        display: block;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .job-more:hover{
+        background-color: #e3ec93;
+    }
+
+    .btn_loader{
+        color: white;
+    }
+
+    /* Boxes with info ---------------------------*/
+    .job-moreinfo{
+        padding: 40px 30px 0 30px;
+        width: 100%;
+        display: none;
+    }
+
+    .info-div{
+        width: 100%;
+        padding: 0 0 30px 0;
+    }
+
+    .info-title{
+        color: #cddc39;
+        font-size: 22px;
+        width: 100%;
+    }
+
+    .info-linea2{
+        width: 35%;
+        background-color: #cddc39;
+        height: 1px;
+        margin-top: 5px;
+    }
+
+    .info-title2{
+        font-size: 16px;
+        padding: 10px 0 10px 20px;
+    }
+
+    .info-box{
+        background-color: rgba(255, 255, 255, 0.16);
+        border: 1px solid #488286;
+        border-radius: 32px;
+        display: inline-block;
+        font-size: 13px;
+        line-height: 16px;
+        padding: 10px 12px 8px 12px;
+        color: white;
+        margin: 0 5px 10px 0;
+        text-decoration: none;
+    }
+    
+    .info-box-photo{
+        background-color: rgba(255, 255, 255, 0.16);
+        border: 1px solid #488286;
+        border-radius: 32px;
+        display: inline-block;
+        font-size: 13px;
+        line-height: 16px;
+        padding: 5px 12px 0 8px;
+        color: white;
+        margin: 0 5px 10px 0;
+        text-decoration: none;
+    }
+
+    .user-photo{
+        height: 30px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    .info-box-photo-text{
+        display: inline-block;
+        vertical-align: top;
+        padding-top: 7px;
+    }
+
+    .info-salary{
+        margin: 10px 5px 10px 0;
+    }
+
+    /* -------------------------- */
+
+    .seach-data input {
+        background-color: #f7f7f7;
+        border: solid 1px transparent;
+        border-radius: 5px;
+        display: inline-block;
+        font: inherit;
+        line-height: 1.5em;
+        padding: 3px;
+        color: #575757;
+    }
+
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none;
+        margin: 0; 
+    }
+
+    input[type=number] {
+        -moz-appearance:textfield;
+    }
+
+    .seach-data input:focus {
+        border-color: transparent;
+        outline: 0;
+    }
+
+    .seach-data label{
+        color: rgba(255, 255, 255, 0.65);
+        font-size: 18px;
+        display: inline-block;
+        padding-bottom: 5px;
+    }
+
+    .padding-top{
+        padding-top: 10px;
+    }
+
+    .form_camp {
+        margin: 30px;
+        background-color: #27292D;
+        padding: 20px;
+        border-radius: 2px;
+    }
+
+    .form_camp input {
+        width: 100%;
+    }
+
+    .add-job{
+        background-color: #cddc39;
+        border-radius: 2px;
+        color: black;
+        text-decoration: none;
+        padding: 7px 0 5px 0;
+        display: block;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+        border: 0;
+        margin-top: 10px;
+        font-size: 16px;
+        width: 100%;
+    }
+
+    .add-job:hover{
+        background-color: #e3ec93;
+    }
+
+    .msg{
+        padding-top: 10px;
+        color: rgba(255, 255, 255, 0.65);
+    }
+
+    
+
+
+   
+@media screen and (max-width: 992px) {
+
+    .menu{
+        padding: 20px 3% 20px 3%;
+    }
+
+    .menu-side{
+        display: block;
+        width: 100%;
+    }
+
+    .seach-data{
+        width: 80%;
+        margin: 50px auto 50px auto;
+    }
+
+    .container{
+        display: block;
+        width: 100%;
+    }
+
+    .job-container{
+        width: 95%;
+        margin: 30px auto 30px auto;
+        padding: 20px 0 20px 0;
+    }
+
+    .job-title{
+        padding: 5px 5% 7px 5%;
+        font-size: 18px;
+    }
+
+    .job-info{
+        padding: 3px 5% 3px 5%;
+        font-size: 16px;
+    }
+
+    .job-line{
+        width: 100%;
+        margin: 20px 0 20px 0;
+    }
+
+    .job-more{
+        margin-left: 5%;
+        padding: 12px 0 10px 0;
+        width: 50%;
+    }
+
+    /* Boxes with info ---------------------------*/
+    .job-moreinfo{
+        padding: 40px 10px 0 10px;
+    }
+
+    .info-div{
+        padding: 0 0 30px 0;
+    }
+
+    .info-title{
+        font-size: 22px;
+        padding-left: 10px;
+    }
+
+    .info-linea2{
+        width: 35%;
+        margin-top: 5px;
+        margin-left: 10px;
+    }
+
+    .info-title2{
+        font-size: 16px;
+        padding: 10px 0 10px 20px;
+    }
+
+    .info-box{
+        font-size: 13px;
+        padding: 10px 12px 8px 12px;
+        margin: 0 5px 10px 0;
+    }
+
+    .info-salary{
+        margin: 10px 5px 10px 0;
+    }
+
+
+    /* ---------------------- */
+    .form_camp{
+        padding: 20px;
+        display: block;
+        width: 100%;
+        border-radius: 2px;
+        margin: 30px auto 30px auto;
+        background-color: #27292D;
+    }
+
+    .form_camp input {
+        width: 100%;
+    }
+
+    .add-job{
+        padding: 12px 10px 10px 10px;
+        margin-top: 10px;
+        font-size: 16px;
+    }
+
+}
+
+@media screen and (min-width: 768px) and (max-width: 992px){
+    
+
+}
+
+</style>

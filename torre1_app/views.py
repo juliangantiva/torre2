@@ -16,13 +16,9 @@ from .check_user_data import check_user_data
 
 
 
-def list_jobs(request):
+def list_jobs(request, size=10, offset=0):
 
-    size = 10
-    offset = 0
     endpoint_jobs = 'https://search.torre.co/opportunities/_search/?size={}&offset={}&aggregate=false'.format(size,offset)
-    
-    
     data = requests.post(endpoint_jobs).json()
 
     jobs_list = data['results']

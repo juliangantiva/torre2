@@ -22,9 +22,10 @@ from torre1_app.views import get_data, list_jobs, get_job
 
 urlpatterns = [
 
+    path('<int:size>/<int:offset>', list_jobs, name='list_jobs'),
     path('', list_jobs, name='list_jobs'),
-    path('get-data', get_data, name='get_data'),
-    path('get-job', get_job, name='get_job'),
+    path('get-data/', get_data, name='get_data'),
+    path('get-job/', get_job, name='get_job'),
 
     path('admin/', admin.site.urls),
 ]

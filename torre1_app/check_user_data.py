@@ -200,7 +200,7 @@ def check_user_data(username, job_id):
             for member_a in members:
                 equal = False
                 for connection_a in connections:
-                    if member_a['person']['username'] == connection_a['metadata']['publicId']:
+                    if member_a['person']['username'] == connection_a['metadata']['publicId'] and not member_a['person']['username'] == username:
                         equal = True
 
                 equal_connections.append(1) if equal else equal_connections.append(0)
