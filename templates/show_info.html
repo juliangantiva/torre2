@@ -143,6 +143,32 @@
             padding: 10px 12px 8px 12px;
             color: white;
             margin: 0 5px 10px 0;
+            text-decoration: none;
+        }
+        
+        .info-box-photo{
+            background-color: rgba(255, 255, 255, 0.16);
+            border: 1px solid #488286;
+            border-radius: 32px;
+            display: inline-block;
+            font-size: 13px;
+            line-height: 16px;
+            padding: 5px 12px 0 8px;
+            color: white;
+            margin: 0 5px 10px 0;
+            text-decoration: none;
+        }
+
+        .user-photo{
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .info-box-photo-text{
+            display: inline-block;
+            vertical-align: top;
+            padding-top: 7px;
         }
 
         .info-salary{
@@ -494,8 +520,6 @@ $(document).ready(function(){
 
     function moreinfo(data){
 
-        console.log(data);
-
         var aux = '';
         ///Skills////////////////////////////////////////////////////
 
@@ -671,6 +695,8 @@ $(document).ready(function(){
 
         ///Connections////////////////////////////////////////////////////
 
+        console.log(data);
+
         var jobMembers = data.job_members;
         var htmlMembers1 = '';
         if (jobMembers.error === undefined){
@@ -679,7 +705,7 @@ $(document).ready(function(){
             aux = '';
             jobMembers.forEach(function(value){
 
-                aux = '<div class="info-member info-box">'+value.person.name+'</div>';
+                aux = '<a href="https://bio.torre.co/'+ value.person.username +'" class="info-member info-box-photo" target="_blank"><img class="user-photo" src="'+ value.person.pictureThumbnail +'"/><div class="info-box-photo-text">' +value.person.name+ '</div></a>';
                 if (value.accomplish == '1') {
                     htmlMembers2 = htmlMembers2 + aux;
                 }
