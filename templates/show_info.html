@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load humanize %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -63,7 +64,7 @@
         }
 
         .job-title{
-            color: #d69600;
+            color: #cddc39;
             padding: 5px 10% 7px 10%;
             font-size: 18px;
         }
@@ -75,13 +76,13 @@
 
         .job-line{
             width: 100%;
-            background-color: #d69600;
+            background-color: #cddc39;
             height: 1px;
             margin: 20px 0 20px 0;
         }
 
         .job-more{
-            background-color: #d69600;
+            background-color: #cddc39;
             border-radius: 2px;
             color: black;
             text-decoration: none;
@@ -115,14 +116,14 @@
         }
 
         .info-title{
-            color: #d69600;
+            color: #cddc39;
             font-size: 22px;
             width: 100%;
         }
 
         .info-linea2{
             width: 35%;
-            background-color: #d69600;
+            background-color: #cddc39;
             height: 1px;
             margin-top: 5px;
         }
@@ -195,7 +196,7 @@
         }
 
         .add-job{
-            background-color: #d69600;
+            background-color: #cddc39;
             border-radius: 2px;
             color: black;
             text-decoration: none;
@@ -345,7 +346,7 @@
         <div class="seach-data">
             <div class="form_camp">
                 <label for="id_username">Username:</label><span id="e_username"></span>
-                <input type="text" name="username" id="id_username" maxlength="120" value="manolo"/>
+                <input type="text" name="username" id="id_username" maxlength="120" value="juliangantiva"/>
             
                 <div class="msg msg_user"></div>
             </div>
@@ -369,13 +370,26 @@
         <div class="job-container cont_{{ oppor.code }}">
             <div class="job-title">{{ oppor.title }}</div>
             <div class="job-info">{{ oppor.opportunity|title }}</div>
-            <div class="job-info">{{ oppor.company }}</div>
+            {% for company in oppor.companies %}
+            <div class="job-info">{{ company }}</div>
+            {% endfor %}
             {% if oppor.remote %}
             <div class="job-info">Remote</div>
             {% else %}
-            <div class="job-info">{{ oppor.location }}</div>
+                {% for location in oppor.locations %}
+                <div class="job-info">{{ location }}</div>
+                {% endfor %}
             {% endif %}
-            {% if oppor.salary %}<div class="job-info">Salary: {{ oppor.salary }}</div>{% endif %}
+            {% if oppor.salary %}
+                {% if oppor.salary.visible %}
+                    {% if oppor.salary.code == 'range' %}
+                    <div class="job-info">Salary: {{oppor.salary.currency}} {{oppor.salary.min_amount|intcomma}} - {{oppor.salary.max_amount|intcomma}} /{{oppor.salary.periodicity}}</div>
+                    {% endif %}
+                    {% if oppor.salary.code == 'fixed' %}
+                    <div class="job-info">Salary: {{oppor.salary.currency}} {{oppor.salary.min_amount|intcomma}} /{{oppor.salary.periodicity}}</div>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
             <div class="job-line"></div>
             <div class="job-more" data-code="{{ oppor.code }}" data-load="0">See if it fits you</div>
 

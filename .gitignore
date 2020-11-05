@@ -3,3 +3,5 @@
 __pycache__/
 *.py[cod]
 *$py.class
+static_in_pro/
+torre1/settings/mail_conf.py

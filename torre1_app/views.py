@@ -12,11 +12,114 @@ from .models import Opportunity
 # and https://search.torre.co/people/_search/?[offset=$offset&size=$size&aggregate=$aggregate] (search for jobs and people in general, you can see how it's being used here: https://torre.co/search).
 
 
+class Job:
+    def __init__(self, title, code, opportunity, companies, remote, locations, salary):
+        self.title      = title
+        self.code       = code
+        self.opportunity= opportunity
+        self.companies  = companies
+        self.remote     = remote
+        self.locations  = locations
+        self.salary     = salary
+
+
+class Salary:
+    def __init__(self, code=None, currency=None, min_amount=None, max_amount=None, periodicity=None, visible=None):
+        self.code       = code
+        self.currency   = currency
+        self.min_amount = min_amount
+        self.max_amount = max_amount
+        self.periodicity= periodicity
+        self.visible    = visible
 
 
 def list_jobs(request):
 
-    opportunities = Opportunity.objects.filter(active=True).all().order_by('id')
+    size = 1
+    offset = 85
+    endpoint_jobs = 'https://search.torre.co/opportunities/_search/?size={}&offset={}&aggregate=false'.format(size,offset)
+    
+    
+    data = requests.post(endpoint_jobs).json()
+
+    jobs_list = data['results']
+    opportunities = []
+    for job in jobs_list:
+        print(job['id'])
+        #status     = job['status'] # open
+        title       = job['objective']
+        code        = job['id']
+        opportunity = job['type']
+        remote      = job['remote']
+        locations   = job['locations'] # it's a list
+
+        companies_list = job['organizations'] # it's a list
+        companies = []
+        for comp in companies_list:
+            companies.insert(0, comp['name'])
+
+        salary_info = job['compensation']
+        salary_obj = None
+        if not salary_info == None:
+            salary_data = salary_info['data']
+            if not salary_data == None:
+                code       = salary_data['code']
+                currency   = salary_data['currency']
+                min_amount = salary_data['minAmount']
+                max_amount = salary_data['maxAmount']
+                periodicity= salary_data['periodicity']
+                visible    = salary_info['visible']
+                
+                salary_obj = Salary(code=code, currency=currency, min_amount=min_amount, max_amount=max_amount, periodicity=periodicity, visible=visible)
+
+        job_obj = Job(title=title, code=code, opportunity=opportunity, companies=companies, remote=remote, locations=locations, salary=salary_obj)
+
+        opportunities.insert(0, job_obj)
+        
+
+
+
+    endpoint_job = 'https://torre.co/api/opportunities/8W39zRdN'
+    job = requests.get(endpoint_job).json()
+
+         
+    #status     = job['status'] # open
+    title       = job['objective']
+    code        = job['id']
+    opportunity = job['opportunity']
+    remote      = job['place']['remote']
+    locations   = job['place']['location'] # it's a list
+    print(job['place'])
+
+    locations_list = job['place']['location'] # it's a list
+    locations = []
+    for locat in locations_list:
+        locations.insert(0, locat['id'])
+    
+    companies_list = job['organizations'] # it's a list
+    companies = []
+    for comp in companies_list:
+        companies.insert(0, comp['name'])
+
+    salary_data = job['compensation']
+    try:
+        code       = salary_data['code']
+        currency   = salary_data['currency']
+        min_amount = salary_data['minAmount']
+        max_amount = salary_data['maxAmount']
+        periodicity= salary_data['periodicity']
+        visible    = salary_data['visible']
+            
+        salary_obj = Salary(code=code, currency=currency, min_amount=min_amount, max_amount=max_amount, periodicity=periodicity, visible=visible)
+    except:
+        salary_obj = None
+
+    job_obj = Job(title=title, code=code, opportunity=opportunity, companies=companies, remote=remote, locations=locations, salary=salary_obj)
+
+    opportunities.insert(0, job_obj)
+
+
+    #opportunities = Opportunity.objects.filter(active=True).all().order_by('-id')
 
     context = {
         'opportunities': opportunities,
@@ -314,3 +417,6 @@ def asign_values(opportunities,oppo_type):
                 oppo_period     = a['data']
 
     return oppo_currency, oppo_amount, oppo_period
+    
+
+
