@@ -352,7 +352,7 @@
             </div>
             <div class="form_camp">
                 <label for="id_job">Job code:</label><span id="e_job"></span>
-                <input type="text" name="job" id="id_job" maxlength="120" value="QweRLKd9"/>
+                <input type="text" name="job" id="id_job" maxlength="120" value="KWNo67wO"/>
                 <button type="submit" class="add-job" id="add-job" data-url="{% url 'get_job' %}">Add a job</button>
             
                 <div class="msg msg_job"></div>
@@ -505,14 +505,19 @@ $(document).ready(function(){
 
             var htmlSkills2 = '';
             var htmlSkills3 = '';
+            var htmlSkills4 = '';
             aux = '';
             jobStrengths.forEach(function(value){
 
                 aux = '<div class="info-skill info-box">'+value.name+'</div>';
-                if (value.accomplish == '1') {
+                if (value.accomplish == 1) {
                     htmlSkills2 = htmlSkills2 + aux;
                 } else {
-                    htmlSkills3 = htmlSkills3 + aux;
+                    if (value.accomplish == 2) {
+                        htmlSkills3 = htmlSkills3 + aux;
+                    } else {
+                        htmlSkills4 = htmlSkills4 + aux;
+                    }
                 }
 
             });
@@ -522,10 +527,14 @@ $(document).ready(function(){
             }
 
             if (htmlSkills3 !== '') {
-                htmlSkills3 = '<div class="info-title2">You need them:</div>' + htmlSkills3;
+                htmlSkills3 = '<div class="info-title2">You must be interested in learning them:</div>' + htmlSkills3;
             }
 
-            htmlSkills1 = htmlSkills2 + htmlSkills3;
+            if (htmlSkills4 !== '') {
+                htmlSkills4 = '<div class="info-title2">You need them:</div>' + htmlSkills4;
+            }
+
+            htmlSkills1 = htmlSkills2 + htmlSkills3 + htmlSkills4;
 
             htmlSkills1 = '<div class="info-div">'+
             '<div class="info-title">Skills</div>'+
@@ -559,7 +568,7 @@ $(document).ready(function(){
 
                 aux = '';
                 if (jobLocation.location_ok == true) {
-                    aux = 'It is in your city.';
+                    aux = 'It is close enough.';
                 } else {
                     aux = 'Probably it is not close to you.';
                 }
@@ -737,44 +746,54 @@ $(document).ready(function(){
 
     function add_job(data){
 
-        console.log(data);
-
-        var title = data.objective;
+        var title = data.title;
         var opportunity = data.opportunity;
         opportunity = opportunity.charAt(0).toUpperCase() + opportunity.substr(1).toLowerCase()
-        var company = data.organizations[0].name;
+        
+        var companiesHtml = '';
+        data.companies.forEach(function(value){
+            companiesHtml = companiesHtml + '<div class="job-info">'+value+'</div>';
+        });
 
-        var remote = data.place.remote;
-        var location = 'Remote';
-        if (remote == false){
-            location = data.place.location[0].id;
+
+        var remote = data.remote;
+        var locationsHtml = '<div class="job-info">Remote</div>';
+        if (remote == false && data.locations.length != 0){
+            locationsHtml = '';
+            data.locations.forEach(function(value){
+                locationsHtml = locationsHtml + '<div class="job-info">'+value+'</div>';
+            });
         }
 
-        var currency = data.compensation.currency;
-        var minAmount = data.compensation.minAmount;
-        var maxAmount = data.compensation.maxAmount;
-        var periodicity = data.compensation.periodicity;
-        var salary = '';
-        if (minAmount == '0') {
-            salary = 'To be defined';
-        } else {
-            var aux = '';
-            if (maxAmount == '0'){
-                aux = ''
-            } else {
-                aux = ' - '+maxAmount;
+        var salaryHTML = '';
+        if (data.salary != null) {
+            if (data.salary.visible == true) {
+                var salaryCode = data.salary.code
+                var currency = data.salary.currency;
+                var minAmount = data.salary.min_amount;
+                var maxAmount = data.salary.max_amount;
+                var periodicity = data.salary.periodicity;
+
+                var salaryHTMLAux = ''
+                if (salaryCode == 'range') {
+                    salaryHTMLAux = currency + ' ' + minAmount + ' - ' + maxAmount + ' /' + periodicity;
+                    salaryHTML = '<div class="job-info">Salary: '+ salaryHTMLAux +'</div>';
+                }
+                if (salaryCode == 'fixed') {
+                    salaryHTMLAux = currency + ' ' + minAmount + ' /' + periodicity;
+                    salaryHTML = '<div class="job-info">Salary: '+ salaryHTMLAux +'</div>';
+                }
             }
-            salary = currency+' '+minAmount+aux+' / '+periodicity;
         }
 
-        var code = data.id;
+        var code = data.code;
 
         var job = '<div class="job-container job-none cont_'+code+'">'+
             '<div class="job-title">'+title+'</div>'+
             '<div class="job-info">'+opportunity+'</div>'+
-            '<div class="job-info">'+company+'</div>'+
-            '<div class="job-info">'+location+'</div>'+
-            '<div class="job-info">Salary: '+salary+'</div>'+
+            companiesHtml+
+            locationsHtml+
+            salaryHTML+
             '<div class="job-line"></div>'+
             '<div class="job-more" data-code="'+code+'" data-load="0">See if it fits you</div>'+
             '<div class="job-moreinfo" id="'+code+'"></div>'+

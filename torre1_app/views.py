@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, Http404
 import json
 import requests
+import math
 
 from .models import Opportunity
 
@@ -36,7 +37,7 @@ class Salary:
 def list_jobs(request):
 
     size = 1
-    offset = 85
+    offset = 0
     endpoint_jobs = 'https://search.torre.co/opportunities/_search/?size={}&offset={}&aggregate=false'.format(size,offset)
     
     
@@ -45,7 +46,7 @@ def list_jobs(request):
     jobs_list = data['results']
     opportunities = []
     for job in jobs_list:
-        print(job['id'])
+
         #status     = job['status'] # open
         title       = job['objective']
         code        = job['id']
@@ -63,60 +64,22 @@ def list_jobs(request):
         if not salary_info == None:
             salary_data = salary_info['data']
             if not salary_data == None:
-                code       = salary_data['code']
+                code_salary= salary_data['code']
                 currency   = salary_data['currency']
                 min_amount = salary_data['minAmount']
                 max_amount = salary_data['maxAmount']
                 periodicity= salary_data['periodicity']
                 visible    = salary_info['visible']
                 
-                salary_obj = Salary(code=code, currency=currency, min_amount=min_amount, max_amount=max_amount, periodicity=periodicity, visible=visible)
+                salary_obj = Salary(code=code_salary, currency=currency, min_amount=min_amount, max_amount=max_amount, periodicity=periodicity, visible=visible)
 
         job_obj = Job(title=title, code=code, opportunity=opportunity, companies=companies, remote=remote, locations=locations, salary=salary_obj)
 
         opportunities.insert(0, job_obj)
         
-
-
-
-    endpoint_job = 'https://torre.co/api/opportunities/8W39zRdN'
-    job = requests.get(endpoint_job).json()
-
-         
-    #status     = job['status'] # open
-    title       = job['objective']
-    code        = job['id']
-    opportunity = job['opportunity']
-    remote      = job['place']['remote']
-    locations   = job['place']['location'] # it's a list
-    print(job['place'])
-
-    locations_list = job['place']['location'] # it's a list
-    locations = []
-    for locat in locations_list:
-        locations.insert(0, locat['id'])
-    
-    companies_list = job['organizations'] # it's a list
-    companies = []
-    for comp in companies_list:
-        companies.insert(0, comp['name'])
-
-    salary_data = job['compensation']
-    try:
-        code       = salary_data['code']
-        currency   = salary_data['currency']
-        min_amount = salary_data['minAmount']
-        max_amount = salary_data['maxAmount']
-        periodicity= salary_data['periodicity']
-        visible    = salary_data['visible']
-            
-        salary_obj = Salary(code=code, currency=currency, min_amount=min_amount, max_amount=max_amount, periodicity=periodicity, visible=visible)
-    except:
-        salary_obj = None
-
-    job_obj = Job(title=title, code=code, opportunity=opportunity, companies=companies, remote=remote, locations=locations, salary=salary_obj)
-
-    opportunities.insert(0, job_obj)
+        # job_obj = get_job_2('KWNo67wO')
+        # if job_obj:
+        #     opportunities.insert(0, job_obj)
 
 
     #opportunities = Opportunity.objects.filter(active=True).all().order_by('-id')
@@ -127,19 +90,68 @@ def list_jobs(request):
 
     return render(request, 'show_info.html', context)
 
+
+
+def get_job_2(job_id):
+    
+    endpoint_job = 'https://torre.co/api/opportunities/{}'.format(job_id)
+    
+
+    try:  
+        job = requests.get(endpoint_job).json()
+
+        #status     = job['status'] # open
+        title       = job['objective']
+        code        = job['id']
+        opportunity = job['opportunity']
+        remote      = job['place']['remote']
+        locations   = job['place']['location'] # it's a list
+
+        locations_list = job['place']['location'] # it's a list
+        locations = []
+        for locat in locations_list:
+            locations.insert(0, locat['id'])
+        
+        companies_list = job['organizations'] # it's a list
+        companies = []
+        for comp in companies_list:
+            companies.insert(0, comp['name'])
+
+        salary_data = job['compensation']
+        try:
+            code_salary= salary_data['code']
+            currency   = salary_data['currency']
+            min_amount = salary_data['minAmount']
+            max_amount = salary_data['maxAmount']
+            periodicity= salary_data['periodicity']
+            visible    = salary_data['visible']
+                
+            #salary_obj = Salary(code=code, currency=currency, min_amount=min_amount, max_amount=max_amount, periodicity=periodicity, visible=visible)
+            salary_obj = {'code':code_salary, 'currency':currency, 'min_amount':min_amount, 'max_amount':max_amount, 'periodicity':periodicity, 'visible': visible}
+            
+        except:
+            salary_obj = None
+
+        #job_obj = Job(title=title, code=code, opportunity=opportunity, companies=companies, remote=remote, locations=locations, salary=salary_obj)
+        job_obj = {'title':title, 'code':code, 'opportunity':opportunity, 'companies':companies, 'remote':remote, 'locations':locations, 'salary':salary_obj}
+  
+    except:
+        job_obj = None
+
+    return job_obj
+    
+
 def get_job(request):
     if request.is_ajax():
         job_id = request.GET.get('code')
+        
+        job_obj = get_job_2(job_id)
+        if not job_obj:
+            job_obj = {'error': True}
+        else:
+            job_obj['error'] = False
 
-        url_job = "https://torre.co/api/opportunities/{}".format(job_id)
-
-        try:
-            data = requests.get(url_job).json()
-            data['error'] = False
-        except:
-            data = { 'error': True }
-
-        return JsonResponse(data)
+        return JsonResponse(job_obj)
     
     else:
         raise Http404
@@ -178,28 +190,29 @@ def get_data(request):
             
             try:
                 user_stren  = r_user['strengths']
-                #user_indus  = r_user['opportunities'][-1]['data']
                 job_stren   = r_job['strengths']
-
+            
                 equal_stren = []
                 for job_stren_a in job_stren:
+                    job_stren_a_name = job_stren_a['name'].lower().replace(" ","").replace("-","")
+                    
                     equal = False
                     for user_stren_a in user_stren:
-                        if job_stren_a['code'] == user_stren_a['code']:
+                        user_stren_a_name = user_stren_a['name'].lower().replace(" ","").replace("-","")
+                    
+                        if job_stren_a['code'] == user_stren_a['code'] or job_stren_a_name == user_stren_a_name:
                             equal = True
 
-                    equal_stren.append(1) if equal else equal_stren.append(0)
+                    if equal == True:
+                        equal_stren.append(1)
+                    elif job_stren_a['experience'] == 'potential-to-develop':
+                        equal_stren.append(2)
+                    else:
+                        equal_stren.append(0)
 
-
-                # for ind, job_stren_a in enumerate(job_stren):
-                #     if equal_stren[ind] == 0:
-                #         for user_indus_a in user_indus:
-                #             if job_stren_a['name'] == user_indus_a['name']:
-                #                 equal_stren[ind] = 2
 
                 for ind, job_stren_a in enumerate(job_stren):
                     job_stren_a['accomplish'] = equal_stren[ind]
-
 
             except:
                 job_stren = { 'error': True }
@@ -213,7 +226,7 @@ def get_data(request):
                 time_ok     = False
                 location_ok = False
                 remote      = False
-
+                
                 job_place = r_job['place']
                 if job_place['remote'] == True:
                     remote = True
@@ -224,11 +237,22 @@ def get_data(request):
                     if timezoneOffSet >= timezones_min and timezoneOffSet <= timezones_max:
                         time_ok = True
                 else:
-                    location_user = r_user['person']['location']['name']
                     location_job = r_job['place']['location'][0]['id']
-                    if location_user == location_job:
-                        location_ok = True
+                    
+                    lat1 = float(r_user['person']['location']['latitude'])
+                    lon1 = float(r_user['person']['location']['longitude'])
+                    lat2 = float(r_job['place']['location'][0]['latitude'])
+                    lon2 = float(r_job['place']['location'][0]['longitude'])
+                    
+                    R = 6378.137 # Radius of earth in KM
+                    d_lat = lat2 * math.pi / 180 - lat1 * math.pi / 180
+                    d_lon = lon2 * math.pi / 180 - lon1 * math.pi / 180
+                    a = math.sin(d_lat/2) * math.sin(d_lat/2) + math.cos(lat1 * math.pi / 180) * math.cos(lat2 * math.pi / 180) * math.sin(d_lon/2) * math.sin(d_lon/2)
+                    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+                    d = R * c # Kilometers
 
+                    if d < 50:
+                        location_ok = True
                 
                 job_location = {
                     'remote': remote,
